@@ -8,6 +8,7 @@ import org.referenceCat.entities.Person;
 import org.referenceCat.entities.CarOwner;
 import org.referenceCat.entities.Officer;
 import org.referenceCat.entities.Vehicle;
+import org.referenceCat.entities.Violation;
 import java.util.Date;
 
 
@@ -19,11 +20,17 @@ public class Application {
 
         em.getTransaction().begin();
 
-        CarOwner carOwner = em.find(CarOwner.class, 8);
-        Vehicle vehicle = new Vehicle();
-        vehicle.setRegNumber("456");
-        vehicle.setOwner(carOwner);
-        em.persist(vehicle);
+        Officer officer = em.find(Officer.class, 12);
+        Vehicle vehicle = em.find(Vehicle.class, 1);
+        Violation violation = new Violation();
+        violation.setOfficer(officer);
+        violation.setVehicle(vehicle);
+        violation.setPenalty("Debt");
+        violation.setDebt(1000);
+        Date date = new Date();
+        date.setTime(0);
+        violation.setDate(date);
+        em.persist(violation);
         em.getTransaction().commit();
 
     }

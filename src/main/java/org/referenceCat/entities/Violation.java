@@ -4,8 +4,11 @@ package org.referenceCat.entities;
  * Date: 11/09/2023 12:36
  */
 
+import javax.persistence.*;
 import java.util.Date;
 
+@Entity
+@Table(name="traffic_police_db.violations")
 public class Violation {
     private int id;
     private Vehicle vehicle;
@@ -17,6 +20,19 @@ public class Violation {
 
     public Violation() {}
 
+    @Id
+    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id")
     public Vehicle getVehicle() {
         return vehicle;
     }
@@ -25,6 +41,7 @@ public class Violation {
         this.vehicle = vehicle;
     }
 
+    @Column(name="commentary")
     public String getCommentary() {
         return commentary;
     }
@@ -33,6 +50,7 @@ public class Violation {
         this.commentary = commentary;
     }
 
+    @Column(name="penalty")
     public String getPenalty() {
         return penalty;
     }
@@ -41,6 +59,7 @@ public class Violation {
         this.penalty = penalty;
     }
 
+    @Column(name="debt")
     public int getDebt() {
         return debt;
     }
@@ -49,6 +68,7 @@ public class Violation {
         this.debt = debt;
     }
 
+    @Column(name="date")
     public Date getDate() {
         return date;
     }
@@ -57,15 +77,13 @@ public class Violation {
         this.date = date;
     }
 
+    @ManyToOne
+    @JoinColumn(name = "officer_id")
     public Officer getOfficer() {
         return officer;
     }
 
     public void setOfficer(Officer officer) {
         this.officer = officer;
-    }
-
-    public int getId() {
-        return id;
     }
 }
