@@ -7,7 +7,9 @@ import javax.persistence.*;
 import org.referenceCat.entities.Person;
 import org.referenceCat.entities.CarOwner;
 import org.referenceCat.entities.Officer;
+import org.referenceCat.entities.Vehicle;
 import java.util.Date;
+
 
 public class Application {
     public static void main(String[] args) {
@@ -17,30 +19,11 @@ public class Application {
 
         em.getTransaction().begin();
 
-        CarOwner carOwner = new CarOwner();
-        carOwner.setName("name");
-        carOwner.setSurname("surname");
-        Date date = new Date();
-        date.setTime(0);
-        carOwner.setBirthDate(date);
-        carOwner.setPassportId(4874298);
-        carOwner.setLicenseId("rbguhfrjiduehf");
-        em.persist(carOwner);
-
-        Officer officer = new Officer();
-        officer.setName("name");
-        officer.setSurname("surname");
-        officer.setBirthDate(date);
-        officer.setPassportId(387398);
-        officer.setPoliceId("eywhbudnjsbgfuhs");
-        em.persist(officer);
-
-        Person person = new Person();
-        person.setName("name");
-        person.setSurname("surname");
-        person.setBirthDate(date);
-        person.setPassportId(3389);
-        em.persist(person);
+        CarOwner carOwner = em.find(CarOwner.class, 8);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setRegNumber("456");
+        vehicle.setOwner(carOwner);
+        em.persist(vehicle);
         em.getTransaction().commit();
 
     }
