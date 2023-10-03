@@ -20,17 +20,16 @@ public class Application {
 
         em.getTransaction().begin();
 
-        Officer officer = em.find(Officer.class, 12);
-        Vehicle vehicle = em.find(Vehicle.class, 1);
-        Violation violation = new Violation();
-        violation.setOfficer(officer);
-        violation.setVehicle(vehicle);
-        violation.setPenalty("Debt");
-        violation.setDebt(1000);
         Date date = new Date();
         date.setTime(0);
-        violation.setDate(date);
-        em.persist(violation);
+
+        Officer officer = new Officer();
+        officer.setName("name");
+        officer.setSurname("surname");
+        officer.setBirthDate(date);
+        officer.setPassportId("4018000000");
+        officer.setPoliceId("Б000000");
+        em.persist(officer);
         em.getTransaction().commit();
 
     }

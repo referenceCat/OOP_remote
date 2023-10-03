@@ -13,8 +13,7 @@ import javax.persistence.*;
 public class Person {
     private int id;
     private Date birthDate;
-    private String Name, Surname, Patronymic;
-    private int passportId;
+    private String Name, Surname, Patronymic, passportId;
     public Person() {}
 
     @Id
@@ -65,11 +64,11 @@ public class Person {
     }
 
     @Column(name="passport_id")
-    public int getPassportId() {
+    public String getPassportId() {
         return passportId;
     }
 
-    public void setPassportId(int passportId) {
+    public void setPassportId(String passportId) {
         this.passportId = passportId;
     }
 }
