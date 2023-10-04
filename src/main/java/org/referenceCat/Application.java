@@ -27,10 +27,9 @@ public class Application {
         officer.setName("name");
         officer.setSurname("surname");
         officer.setBirthDate(date);
-        officer.setPassportId("4018000000");
-        officer.setPoliceId("Б000000");
+        officer.setPassportId("4018000001");
+        officer.setPoliceId("Б000001");
         em.persist(officer);
         em.getTransaction().commit();
-
     }
 }

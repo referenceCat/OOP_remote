@@ -12,7 +12,7 @@ import org.referenceCat.entities.Person;
 @Table(name="traffic_police_db.vehicles")
 public class Vehicle {
     private int id;
-    private Person owner;
+    private CarOwner owner;
     private String regNumber, model, color;
     private Date maintenanceDate;
 
@@ -31,11 +31,11 @@ public class Vehicle {
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    public Person getOwner() {
+    public CarOwner getOwner() {
         return owner;
     }
 
-    public void setOwner(Person owner) {
+    public void setOwner(CarOwner owner) {
         this.owner = owner;
     }
 
