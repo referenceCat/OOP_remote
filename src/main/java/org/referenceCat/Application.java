@@ -11,25 +11,22 @@ import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import java.util.Date;
 
+import java.awt.*;
+import javax.swing.*;
+
 
 public class Application {
+    private JFrame frame;
+
+    public void show() {
+        frame = new JFrame("Traffic Police database");
+        frame.setSize(960, 540);
+        frame.setLocation(100, 100);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
     public static void main(String[] args) {
         System.out.println("Hello world");
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
-
-        Date date = new Date();
-        date.setTime(0);
-
-        Officer officer = new Officer();
-        officer.setName("name");
-        officer.setSurname("surname");
-        officer.setBirthDate(date);
-        officer.setPassportId("4018000001");
-        officer.setPoliceId("Б000001");
-        em.persist(officer);
-        em.getTransaction().commit();
+        new Application().show();
     }
 }
