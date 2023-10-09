@@ -10,9 +10,12 @@ import javax.persistence.Entity;
 
 @Entity
 public class CarOwner extends Person {
-    public CarOwner() {}
+    private String licenseId;
 
-    @Column(name="license_id")
+    public CarOwner() {
+    }
+
+    @Column(name = "license_id")
     public String getLicenseId() {
         return licenseId;
     }
@@ -20,6 +23,4 @@ public class CarOwner extends Person {
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
     }
-
-    private String licenseId;
 }

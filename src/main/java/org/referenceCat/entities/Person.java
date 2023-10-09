@@ -4,20 +4,22 @@ package org.referenceCat.entities;
  * Date: 11/09/2023 12:34
  */
 
-import java.util.Date;
 import javax.persistence.*;
+import java.util.Date;
 
-@Entity                            
-@Table(name="traffic_police_db.persons")
+@Entity
+@Table(name = "traffic_police_db.persons")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Person {
     private int id;
     private Date birthDate;
     private String Name, Surname, Patronymic, passportId;
-    public Person() {}
+
+    public Person() {
+    }
 
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -27,7 +29,7 @@ public class Person {
         this.id = id;
     }
 
-    @Column(name="birth_date")
+    @Column(name = "birth_date")
     public Date getBirthDate() {
         return birthDate;
     }
@@ -36,7 +38,7 @@ public class Person {
         this.birthDate = birthDate;
     }
 
-    @Column(name="name")
+    @Column(name = "name")
     public String getName() {
         return Name;
     }
@@ -45,7 +47,7 @@ public class Person {
         Name = name;
     }
 
-    @Column(name="surname")
+    @Column(name = "surname")
     public String getSurname() {
         return Surname;
     }
@@ -54,7 +56,7 @@ public class Person {
         Surname = surname;
     }
 
-    @Column(name="patronymic")
+    @Column(name = "patronymic")
     public String getPatronymic() {
         return Patronymic;
     }
@@ -63,7 +65,7 @@ public class Person {
         Patronymic = patronymic;
     }
 
-    @Column(name="passport_id")
+    @Column(name = "passport_id")
     public String getPassportId() {
         return passportId;
     }

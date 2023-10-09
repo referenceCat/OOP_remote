@@ -11,10 +11,11 @@ import javax.persistence.Entity;
 @Entity
 public class Officer extends Person {
     private String policeId;
-    
-    public Officer() {}
 
-    @Column(name="police_id")
+    public Officer() {
+    }
+
+    @Column(name = "police_id")
     public String getPoliceId() {
         return policeId;
     }

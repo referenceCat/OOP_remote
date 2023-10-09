@@ -6,20 +6,20 @@ package org.referenceCat.entities;
 
 import javax.persistence.*;
 import java.util.Date;
-import org.referenceCat.entities.Person;
 
 @Entity
-@Table(name="traffic_police_db.vehicles")
+@Table(name = "traffic_police_db.vehicles")
 public class Vehicle {
     private int id;
     private CarOwner owner;
     private String regNumber, model, color;
     private Date maintenanceDate;
 
-    public Vehicle() {}
+    public Vehicle() {
+    }
 
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -39,7 +39,7 @@ public class Vehicle {
         this.owner = owner;
     }
 
-    @Column(name="reg_number")
+    @Column(name = "reg_number")
     public String getRegNumber() {
         return regNumber;
     }
@@ -48,7 +48,7 @@ public class Vehicle {
         this.regNumber = regNumber;
     }
 
-    @Column(name="model")
+    @Column(name = "model")
     public String getModel() {
         return model;
     }
@@ -57,7 +57,7 @@ public class Vehicle {
         this.model = model;
     }
 
-    @Column(name="color")
+    @Column(name = "color")
     public String getColor() {
         return color;
     }
@@ -66,7 +66,7 @@ public class Vehicle {
         this.color = color;
     }
 
-    @Column(name="maintenance_date")
+    @Column(name = "maintenance_date")
     public Date getMaintenanceDate() {
         return maintenanceDate;
     }

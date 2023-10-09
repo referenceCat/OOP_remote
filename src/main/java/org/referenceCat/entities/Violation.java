@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name="traffic_police_db.violations")
+@Table(name = "traffic_police_db.violations")
 public class Violation {
     private int id;
     private Vehicle vehicle;
@@ -18,10 +18,11 @@ public class Violation {
     private Date date;
     private Officer officer;
 
-    public Violation() {}
+    public Violation() {
+    }
 
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -41,7 +42,7 @@ public class Violation {
         this.vehicle = vehicle;
     }
 
-    @Column(name="commentary")
+    @Column(name = "commentary")
     public String getCommentary() {
         return commentary;
     }
@@ -50,7 +51,7 @@ public class Violation {
         this.commentary = commentary;
     }
 
-    @Column(name="penalty")
+    @Column(name = "penalty")
     public String getPenalty() {
         return penalty;
     }
@@ -59,7 +60,7 @@ public class Violation {
         this.penalty = penalty;
     }
 
-    @Column(name="debt")
+    @Column(name = "debt")
     public int getDebt() {
         return debt;
     }
@@ -68,7 +69,7 @@ public class Violation {
         this.debt = debt;
     }
 
-    @Column(name="date")
+    @Column(name = "date")
     public Date getDate() {
         return date;
     }
