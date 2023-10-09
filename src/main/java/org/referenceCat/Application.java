@@ -102,10 +102,20 @@ public class Application {
         tableOwners = new JTable(modelOwners);
         scrollOwners = new JScrollPane(tableOwners);
 
-        String[] columnsViolations = {"id", "car id", "reg number", "owner id", "owner", "penalty", "debt", "commentary"};
+        tableOwners.getColumnModel().getColumn(0).setMaxWidth(30);
+        tableOwners.getColumnModel().getColumn(0).setMinWidth(30);
+
+        String[] columnsViolations = {"id", "penalty", "debt", "commentary", "cid", "reg number", "oid", "owner"};
         modelViolations = new DefaultTableModel(columnsViolations, 10);
         tableViolations = new JTable(modelViolations);
         scrollViolations = new JScrollPane(tableViolations);
+
+        tableViolations.getColumnModel().getColumn(0).setMaxWidth(30);
+        tableViolations.getColumnModel().getColumn(0).setMinWidth(30);
+        tableViolations.getColumnModel().getColumn(4).setMaxWidth(30);
+        tableViolations.getColumnModel().getColumn(4).setMinWidth(30);
+        tableViolations.getColumnModel().getColumn(6).setMaxWidth(30);
+        tableViolations.getColumnModel().getColumn(6).setMinWidth(30);
 
         tabs = new JTabbedPane();
         tabs.add("Vehicles", scrollVehicles);
