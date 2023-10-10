@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
+import java.awt.event.*;
+
 
 public class Application {
     private JFrame frame;
@@ -124,7 +126,9 @@ public class Application {
         tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         frame.add(tabs);
 
-
         frame.setVisible(true);
+
+        addButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
     }
 }
+
