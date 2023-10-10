@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.awt.event.*;
+import org.referenceCat.ui.GhostText;
 
 
 public class Application {
@@ -64,9 +65,10 @@ public class Application {
         } catch (Exception e) {
         }
 
-        searchTextField = new JTextField("search");
+        searchTextField = new JTextField();
         searchTextField.setPreferredSize(new Dimension(400, 42));
         searchTextField.setMaximumSize(searchTextField.getPreferredSize());
+        GhostText ghostText = new GhostText(searchTextField, "Search");
 
 
         // Добавление кнопок на панель инструментов
