@@ -8,24 +8,40 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
-import java.awt.event.*;
+
 import org.referenceCat.ui.GhostText;
 
 
 public class Application {
+    /**
+     *<p>Основное окно</p>
+     */
     private JFrame frame;
+    /**
+     *<p>Поля необходимые для панели инчтрументов</p>
+     */
     private JButton addButton, deleteButton, editButton, searchButton, reloadButton;
     private JTextField searchTextField;
     private JToolBar toolBar;
+
+    /**
+     *<p>Поля необходимые для отображения таблиц</p>
+     */
     private JTabbedPane tabs;
     private JScrollPane scrollVehicles, scrollOwners, scrollViolations;
     private JTable tableVehicles, tableOwners, tableViolations;
     private DefaultTableModel modelVehicles, modelOwners, modelViolations;
 
+    /**
+     *<p>Entry point</p>
+     */
     public static void main(String[] args) {
         new Application().show();
     }
 
+    /**
+     *<p>Generates window with all elements. Should be called once.</p>
+     */
     public void show() {
         frame = new JFrame("Traffic Police database");
         frame.setSize(1500, 900);
@@ -62,7 +78,7 @@ public class Application {
 
             Image image5 = ImageIO.read(new File("src/main/resources/ui/reload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             reloadButton.setIcon(new ImageIcon(image5));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         searchTextField = new JTextField();
@@ -131,6 +147,7 @@ public class Application {
         frame.setVisible(true);
 
         addButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
+        deleteButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
     }
 }
 
