@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 
+import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
 
 
@@ -148,6 +149,18 @@ public class Application {
 
         addButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
         deleteButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
+        searchButton.addActionListener(event -> {
+            try {
+                search();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+            }
+        });
+    }
+
+    private void search() throws ValidationException {
+        System.out.println(searchTextField.getText());
+        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) throw new ValidationException("empty text field");
     }
 }
 
