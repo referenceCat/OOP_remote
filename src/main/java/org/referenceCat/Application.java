@@ -8,9 +8,17 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
-
+import java.util.List;
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
+
+import javax.persistence.*;
+import org.referenceCat.entities.Person;
+import org.referenceCat.entities.CarOwner;
+import org.referenceCat.entities.Officer;
+import org.referenceCat.entities.Vehicle;
+import org.referenceCat.entities.Violation;
+import java.util.Date;
 
 
 public class Application {
@@ -106,7 +114,7 @@ public class Application {
         scrollViolations = new JScrollPane();
         scrollOwners = new JScrollPane();
 
-        String[] columnsVehicles = {"id", "reg number", "model", "color", "maintenance date", "oid", "owner", "passport", "license", "status"};
+        String[] columnsVehicles = {"id", "reg number", "model", "color", "maintenance date", "oid", "owner"};
         modelVehicles = new DefaultTableModel(columnsVehicles, 100);
         tableVehicles = new JTable(modelVehicles);
         scrollVehicles = new JScrollPane(tableVehicles);
@@ -118,7 +126,7 @@ public class Application {
         tableVehicles.getColumnModel().getColumn(5).setMaxWidth(30);
         tableVehicles.getColumnModel().getColumn(5).setMinWidth(30);
 
-        String[] columnsOwners = {"id", "name", "surname", "patronymic", "passport", "license"};
+        String[] columnsOwners = {"id", "surname", "name", "patronymic", "birth date", "passport", "license"};
         modelOwners = new DefaultTableModel(columnsOwners, 10);
         tableOwners = new JTable(modelOwners);
         scrollOwners = new JScrollPane(tableOwners);
@@ -149,6 +157,8 @@ public class Application {
 
         addButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
         deleteButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
+
+        reloadButton.addActionListener(event -> update_table());
         searchButton.addActionListener(event -> {
             try {
                 search();
@@ -156,11 +166,47 @@ public class Application {
                 JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
             }
         });
+        update_table();
     }
 
     private void search() throws ValidationException {
         System.out.println(searchTextField.getText());
         if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) throw new ValidationException("empty text field");
+    }
+
+    private void update_table() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+
+        em.getTransaction().begin();
+        List<Vehicle> vehicles =em.createQuery("SELECT v FROM Vehicle v").getResultList();
+
+        DefaultTableModel model = (DefaultTableModel) tableVehicles.getModel();
+        model.setRowCount(0);
+        for (Vehicle vehicle: vehicles) {
+            CarOwner owner = vehicle.getOwner();
+            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), vehicle.getMaintenanceDate(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+        }
+
+        List<CarOwner> owners = em.createQuery("SELECT v FROM CarOwner v").getResultList();
+
+        model = (DefaultTableModel) tableOwners.getModel();
+        model.setRowCount(0);
+        for (CarOwner owner: owners) {
+            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), owner.getBirthDate(), owner.getPassportId(), owner.getLicenseId()});
+        }
+
+        List<Violation> violations = em.createQuery("SELECT v FROM Violation v").getResultList();
+
+        model = (DefaultTableModel) tableViolations.getModel();
+        model.setRowCount(0);
+        for (Violation violation: violations) {
+            Vehicle vehicle = violation.getVehicle();
+            CarOwner owner = vehicle.getOwner();
+            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+        }
+
+
     }
 }
 
