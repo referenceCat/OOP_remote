@@ -8,50 +8,37 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
+import java.awt.Color;
+
 
 import javax.persistence.*;
-import org.referenceCat.entities.Person;
+
 import org.referenceCat.entities.CarOwner;
-import org.referenceCat.entities.Officer;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import java.util.Date;
 
 
 public class Application {
-    /**
-     *<p>Основное окно</p>
-     */
     private JFrame frame;
-    /**
-     *<p>Поля необходимые для панели инчтрументов</p>
-     */
     private JButton addButton, deleteButton, editButton, searchButton, reloadButton;
     private JTextField searchTextField;
     private JToolBar toolBar;
-
-    /**
-     *<p>Поля необходимые для отображения таблиц</p>
-     */
     private JTabbedPane tabs;
     private JScrollPane scrollVehicles, scrollOwners, scrollViolations;
     private JTable tableVehicles, tableOwners, tableViolations;
     private DefaultTableModel modelVehicles, modelOwners, modelViolations;
 
-    /**
-     *<p>Entry point</p>
-     */
     public static void main(String[] args) {
-        new Application().show();
+        new Application().uiInit();
     }
 
-    /**
-     *<p>Generates window with all elements. Should be called once.</p>
-     */
-    public void show() {
+    public void uiInit() {
         frame = new JFrame("Traffic Police database");
         frame.setSize(1500, 900);
         frame.setLocation(100, 100);
@@ -134,17 +121,17 @@ public class Application {
         tableOwners.getColumnModel().getColumn(0).setMaxWidth(30);
         tableOwners.getColumnModel().getColumn(0).setMinWidth(30);
 
-        String[] columnsViolations = {"id", "penalty", "debt", "commentary", "cid", "reg number", "oid", "owner"};
+        String[] columnsViolations = {"id", "penalty", "debt", "commentary", "date", "cid", "reg number", "oid", "owner"};
         modelViolations = new DefaultTableModel(columnsViolations, 10);
         tableViolations = new JTable(modelViolations);
         scrollViolations = new JScrollPane(tableViolations);
 
         tableViolations.getColumnModel().getColumn(0).setMaxWidth(30);
         tableViolations.getColumnModel().getColumn(0).setMinWidth(30);
-        tableViolations.getColumnModel().getColumn(4).setMaxWidth(30);
-        tableViolations.getColumnModel().getColumn(4).setMinWidth(30);
-        tableViolations.getColumnModel().getColumn(6).setMaxWidth(30);
-        tableViolations.getColumnModel().getColumn(6).setMinWidth(30);
+        tableViolations.getColumnModel().getColumn(5).setMaxWidth(30);
+        tableViolations.getColumnModel().getColumn(5).setMinWidth(30);
+        tableViolations.getColumnModel().getColumn(7).setMaxWidth(30);
+        tableViolations.getColumnModel().getColumn(7).setMinWidth(30);
 
         tabs = new JTabbedPane();
         tabs.add("Vehicles", scrollVehicles);
@@ -155,7 +142,7 @@ public class Application {
 
         frame.setVisible(true);
 
-        addButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
+        addButton.addActionListener(event -> onAddButton());
         deleteButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
 
         reloadButton.addActionListener(event -> update_table());
@@ -203,10 +190,189 @@ public class Application {
         for (Violation violation: violations) {
             Vehicle vehicle = violation.getVehicle();
             CarOwner owner = vehicle.getOwner();
-            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), violation.getDate(), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+        }
+    }
+
+    private void onAddButton() {
+        if (tabs.getSelectedIndex() == 0) {
+            JTextField registrationField = new JTextField();
+            JTextField modelField = new JTextField();
+            JTextField colorField = new JTextField();
+            JTextField ownerField = new JTextField();
+            final JComponent[] inputs = new JComponent[]{
+                    new JLabel("Registration number: *"),
+                    registrationField,
+                    new JLabel("Model:"),
+                    modelField,
+                    new JLabel("Color:"),
+                    colorField,
+                    new JLabel("Owner id: *"),
+                    ownerField
+            };
+            while (true) {
+                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter vehicle data", JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    if (isRegNumberValid(registrationField.getText()) && isInteger(ownerField.getText())) break;
+                    if (!isRegNumberValid(registrationField.getText())) {
+                        registrationField.setBackground(Color.pink);
+                    }
+
+                    if (!isInteger(ownerField.getText())) {
+                        ownerField.setBackground(Color.pink);
+                    }
+                } else return;
+            }
+
+            Vehicle vehicle = new Vehicle();
+            vehicle.setRegNumber(registrationField.getText());
+            if (!modelField.getText().isEmpty()) vehicle.setModel(modelField.getText());
+            if (!colorField.getText().isEmpty()) vehicle.setColor(colorField.getText());
+
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            em.getTransaction().begin();
+            CarOwner owner = em.getReference(CarOwner.class, Integer.parseInt(ownerField.getText()));
+            vehicle.setOwner(owner);
+            em.persist(vehicle);
+            em.getTransaction().commit();
+
+        } else if (tabs.getSelectedIndex() == 1) {
+            JTextField surnameInput = new JTextField();
+            JTextField nameInput = new JTextField();
+            JTextField patronymicInput = new JTextField();
+            JTextField birthDateInput = new JTextField();
+            JTextField passportInput = new JTextField();
+            JTextField licenseInput = new JTextField();
+            final JComponent[] inputs = new JComponent[]{
+                    new JLabel("Surname: *"),
+                    surnameInput,
+                    new JLabel("Name: *"),
+                    nameInput,
+                    new JLabel("Patronymic:"),
+                    patronymicInput,
+                    new JLabel("Birth date: *"),
+                    birthDateInput,
+                    new JLabel("Passport number: *"),
+                    passportInput,
+                    new JLabel("License number: *"),
+                    licenseInput
+            };
+            while (true) {
+                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter person's data", JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    if (!surnameInput.getText().isEmpty()
+                            && !nameInput.getText().isEmpty()
+                            && isDate(birthDateInput.getText())
+                            && !passportInput.getText().isEmpty()
+                            && !licenseInput.getText().isEmpty()) break;
+
+                    if (surnameInput.getText().isEmpty()) surnameInput.setBackground(Color.pink);
+                    if (nameInput.getText().isEmpty()) nameInput.setBackground(Color.pink);
+                    if (!isDate(birthDateInput.getText())) birthDateInput.setBackground(Color.pink);
+                    if (passportInput.getText().isEmpty()) passportInput.setBackground(Color.pink);
+                    if (licenseInput.getText().isEmpty()) licenseInput.setBackground(Color.pink);
+                } else return;
+            }
+
+            CarOwner owner = new CarOwner();
+            owner.setSurname(surnameInput.getText());
+            owner.setName(nameInput.getText());
+            if (!patronymicInput.getText().isEmpty()) owner.setPatronymic(patronymicInput.getText());
+
+            Date date = new Date();
+            try {
+                 date = new SimpleDateFormat("dd.MM.yyyy").parse(birthDateInput.getText());
+            } catch (ParseException ignored) {}
+            owner.setBirthDate(date);
+            owner.setPassportId(passportInput.getText());
+            owner.setLicenseId(licenseInput.getText());
+
+
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            em.getTransaction().begin();
+            em.persist(owner);
+            em.getTransaction().commit();
+
+        } else {
+            String[] options = {"Debt", "Jail (10 years)", "Warning", "Deprivation of license"};
+            JComboBox penaltyInput= new JComboBox(options);
+            JTextField debtInput = new JTextField();
+            JTextField commentaryInput = new JTextField();
+            JTextField dateInput = new JTextField();
+            JTextField vehicleIdInput = new JTextField();
+            final JComponent[] inputs = new JComponent[]{
+                    new JLabel("Penalty: *"),
+                    penaltyInput,
+                    new JLabel("Debt: "),
+                    debtInput,
+                    new JLabel("Commentary:"),
+                    commentaryInput,
+                    new JLabel("Date: *"),
+                    dateInput,
+                    new JLabel("Vehicle id: *"),
+                    vehicleIdInput
+            };
+            while (true) {
+                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter violation data", JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    if (!(penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText()))
+                            && isDate(dateInput.getText())
+                            && isInteger(vehicleIdInput.getText())) break;
+
+                    if (penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText())) debtInput.setBackground(Color.pink);
+                    if (!isDate(dateInput.getText())) dateInput.setBackground(Color.pink);
+                    if (!isInteger(vehicleIdInput.getText())) vehicleIdInput.setBackground(Color.pink);
+                } else return;
+            }
+
+            Violation violation = new Violation();
+            Vehicle vehicle;
+            violation.setPenalty(options[penaltyInput.getSelectedIndex()]);
+            if (penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(debtInput.getText()));
+            if (!commentaryInput.getText().isEmpty()) violation.setCommentary(commentaryInput.getText());
+
+            Date date = new Date();
+            try {
+                date = new SimpleDateFormat("dd.MM.yyyy").parse(dateInput.getText());
+            } catch (ParseException ignored) {}
+            violation.setDate(date);
+
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            em.getTransaction().begin();
+            vehicle = em.getReference(Vehicle.class, Integer.parseInt(vehicleIdInput.getText()));
+            violation.setVehicle(vehicle);
+            em.persist(violation);
+            em.getTransaction().commit();
         }
 
+        update_table();
+    }
 
+    private boolean isInteger(String string) {
+        try {
+            Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isRegNumberValid(String string) {
+        if (string.isEmpty()) return false;
+        // TODO
+        return true;
+    }
+
+    private boolean isDate(String string) {
+        try {
+            Date date = new SimpleDateFormat("dd.MM.yyyy").parse(string);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 }
 
