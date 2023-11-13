@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -18,16 +20,28 @@ import java.awt.Color;
 
 
 import javax.persistence.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
 import java.util.Date;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 
 public class Application {
     private JFrame frame;
-    private JButton addButton, deleteButton, editButton, searchButton, reloadButton;
+    private JButton addButton, deleteButton, editButton, searchButton, reloadButton, readXMLButton, writeXMLButton;
     private JTextField searchTextField;
     private JToolBar toolBar;
     private JTabbedPane tabs;
@@ -60,6 +74,12 @@ public class Application {
         reloadButton = new JButton();
         reloadButton.setToolTipText("Reload");
 
+        readXMLButton = new JButton();
+        readXMLButton.setToolTipText("Read XML");
+
+        writeXMLButton = new JButton();
+        writeXMLButton.setToolTipText("Write XML");
+
         try {
             Image image1 = ImageIO.read(new File("src/main/resources/ui/plus.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             addButton.setIcon(new ImageIcon(image1));
@@ -75,6 +95,12 @@ public class Application {
 
             Image image5 = ImageIO.read(new File("src/main/resources/ui/reload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             reloadButton.setIcon(new ImageIcon(image5));
+
+            Image image6 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            readXMLButton.setIcon(new ImageIcon(image6));
+
+            Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            writeXMLButton.setIcon(new ImageIcon(image7));
         } catch (Exception ignored) {
         }
 
@@ -92,6 +118,8 @@ public class Application {
         toolBar.add(deleteButton);
         toolBar.add(editButton);
         toolBar.add(reloadButton);
+        toolBar.add(readXMLButton);
+        toolBar.add(writeXMLButton);
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(searchTextField);
         toolBar.add(searchButton);
@@ -152,8 +180,33 @@ public class Application {
                 search();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                e.printStackTrace();
             }
         });
+
+        readXMLButton.addActionListener(event -> {
+            try {
+                readXML();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                e.printStackTrace();
+            }
+        });
+
+        writeXMLButton.addActionListener(event -> {
+            try {
+                writeXML();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                e.printStackTrace();
+            }
+        });
+
+        writeXMLButton.setEnabled(false);
+        tabs.addChangeListener(e -> {
+            writeXMLButton.setEnabled(tabs.getSelectedIndex() == 2);
+        });
+
         updateTable();
     }
 
@@ -163,17 +216,14 @@ public class Application {
     }
 
     private void updateTable() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
+        EntityManager em = beginTransaction();
         List<Vehicle> vehicles =em.createQuery("SELECT v FROM Vehicle v").getResultList();
 
         DefaultTableModel model = (DefaultTableModel) tableVehicles.getModel();
         model.setRowCount(0);
         for (Vehicle vehicle: vehicles) {
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), vehicle.getMaintenanceDate(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), dateToString(vehicle.getMaintenanceDate()), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
 
         List<Owner> owners = em.createQuery("SELECT v FROM Owner v").getResultList();
@@ -181,7 +231,7 @@ public class Application {
         model = (DefaultTableModel) tableOwners.getModel();
         model.setRowCount(0);
         for (Owner owner: owners) {
-            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), owner.getBirthDate(), owner.getPassportId(), owner.getLicenseId()});
+            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), dateToString(owner.getBirthDate()), owner.getPassportId(), owner.getLicenseId()});
         }
 
         List<Violation> violations = em.createQuery("SELECT v FROM Violation v").getResultList();
@@ -191,7 +241,7 @@ public class Application {
         for (Violation violation: violations) {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), violation.getDate(), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
     }
 
@@ -230,13 +280,11 @@ public class Application {
             if (!modelField.getText().isEmpty()) vehicle.setModel(modelField.getText());
             if (!colorField.getText().isEmpty()) vehicle.setColor(colorField.getText());
 
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-            EntityManager em = emf.createEntityManager();
-            em.getTransaction().begin();
+            EntityManager em = beginTransaction();
             Owner owner = em.getReference(Owner.class, Integer.parseInt(ownerField.getText()));
             vehicle.setOwner(owner);
             em.persist(vehicle);
-            em.getTransaction().commit();
+            commitTransaction(em);
 
         } else if (tabs.getSelectedIndex() == 1) {
             JTextField surnameInput = new JTextField();
@@ -283,18 +331,16 @@ public class Application {
 
             Date date = new Date();
             try {
-                 date = new SimpleDateFormat("dd.MM.yyyy").parse(birthDateInput.getText());
+                 parseDate(birthDateInput.getText());
             } catch (ParseException ignored) {}
             owner.setBirthDate(date);
             owner.setPassportId(passportInput.getText());
             owner.setLicenseId(licenseInput.getText());
 
 
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-            EntityManager em = emf.createEntityManager();
-            em.getTransaction().begin();
+            EntityManager em = beginTransaction();
             em.persist(owner);
-            em.getTransaction().commit();
+            commitTransaction(em);
 
         } else {
             String[] options = {"Debt", "Jail (10 years)", "Warning", "Deprivation of license"};
@@ -336,17 +382,15 @@ public class Application {
 
             Date date = new Date();
             try {
-                date = new SimpleDateFormat("dd.MM.yyyy").parse(dateInput.getText());
+                date = parseDate(dateInput.getText());
             } catch (ParseException ignored) {}
             violation.setDate(date);
 
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-            EntityManager em = emf.createEntityManager();
-            em.getTransaction().begin();
+            EntityManager em = beginTransaction();
             vehicle = em.getReference(Vehicle.class, Integer.parseInt(vehicleIdInput.getText()));
             violation.setVehicle(vehicle);
             em.persist(violation);
-            em.getTransaction().commit();
+            commitTransaction(em);
         }
 
         updateTable();
@@ -365,7 +409,7 @@ public class Application {
                 deleteOwner((Integer) tableOwners.getValueAt(index, 0));
             }
         } else {
-            indexes = tableOwners.getSelectedRows();
+            indexes = tableViolations.getSelectedRows();
             for (int index : indexes) {
                 deleteViolation((Integer) tableViolations.getValueAt(index, 0));
             }
@@ -374,37 +418,28 @@ public class Application {
     }
 
     private void deleteVehilce(int id) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
+        EntityManager em = beginTransaction();
         Vehicle vehicle = em.find(Vehicle.class, id);
         List<Violation> violations = em.createQuery("SELECT v from Violation v WHERE vehicle_id = " + Integer.toString(vehicle.getId())).getResultList();
         for (Violation violation : violations) deleteViolation(violation.getId());
         em.remove(vehicle);
-        em.getTransaction().commit();
+        commitTransaction(em);
     }
 
     private void deleteViolation(int id) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
+        EntityManager em = beginTransaction();
         Violation violation = em.find(Violation.class, id);
         em.remove(violation);
-        em.getTransaction().commit();
+        commitTransaction(em);
     }
 
     private void deleteOwner(int id) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
+        EntityManager em = beginTransaction();
         Owner owner = em.find(Owner.class, id);
         List<Vehicle> vehicles = em.createQuery("SELECT v from Vehicle v WHERE owner_id = " + Integer.toString(owner.getId())).getResultList();
         for (Vehicle vehicle : vehicles) deleteVehilce(vehicle.getId());
         em.remove(owner);
-        em.getTransaction().commit();
+        commitTransaction(em);
     }
 
 
@@ -425,11 +460,84 @@ public class Application {
 
     private boolean isDate(String string) {
         try {
-            Date date = new SimpleDateFormat("dd.MM.yyyy").parse(string);
+            parseDate(string);
             return true;
         } catch (ParseException e) {
             return false;
         }
+    }
+
+    private void readXML() throws ParserConfigurationException, IOException, SAXException, ParseException {
+        DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = dBuilder.parse(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml"));
+        doc.getDocumentElement().normalize();
+
+        EntityManager em = beginTransaction();
+
+        NodeList nlViolations = doc.getElementsByTagName("violation");
+        for (int temp = 0; temp < nlViolations.getLength(); temp++) {
+            Node elem = nlViolations.item(temp);
+            NamedNodeMap attrs = elem.getAttributes();
+            Violation violation = new Violation();
+            violation.setPenalty(attrs.getNamedItem("penalty").getNodeValue());
+            if (violation.getPenalty().equals("Debt")) violation.setDebt(Integer.parseInt(attrs.getNamedItem("debt").getNodeValue()));
+            if (attrs.getNamedItem("commentary") != null) violation.setCommentary(attrs.getNamedItem("commentary").getNodeValue());
+            violation.setDate(parseDate(attrs.getNamedItem("date").getNodeValue()));
+            Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(attrs.getNamedItem("vehicle_id").getNodeValue()));
+            violation.setVehicle(vehicle);
+            em.persist(violation);
+        }
+        commitTransaction(em);
+        updateTable();
+    }
+
+    private static void commitTransaction(EntityManager em) {
+        em.getTransaction().commit();
+    }
+
+    private static EntityManager beginTransaction() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        return em;
+    }
+
+    private void writeXML() throws ParserConfigurationException, TransformerException, IOException {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.newDocument();
+        Node violations = doc.createElement("violations");
+        doc.appendChild(violations);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+        int[] indexes;
+        indexes = tableViolations.getSelectedRows();
+        if (indexes.length == 0) {
+            indexes = new int[tableViolations.getRowCount()];
+            for (int i = 0; i < tableViolations.getRowCount(); i++) indexes[i] = i;
+        }
+        for (int index : indexes) {
+            Violation violation = em.find(Violation.class, tableViolations.getValueAt(index, 0));
+            Element item = doc.createElement("violation");
+            violations.appendChild(item);
+            item.setAttribute("id", Integer.toString(violation.getId()));
+            item.setAttribute("penalty", violation.getPenalty());
+            if (violation.getPenalty().equals("Debt")) item.setAttribute("debt", Integer.toString(violation.getDebt()));
+            if (violation.getCommentary() != null) item.setAttribute("commentary", violation.getCommentary());
+            item.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
+            item.setAttribute("date", dateToString(violation.getDate()));
+        }
+
+        Transformer trans = TransformerFactory.newInstance().newTransformer();
+        java.io.FileWriter fw = new FileWriter("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
+        trans.transform(new DOMSource(doc), new StreamResult(fw));
+    }
+    private Date parseDate(String s) throws ParseException {
+        return new SimpleDateFormat("dd.MM.yyyy").parse(s);
+    }
+
+    private String dateToString(Date date) {
+        if (date == null) return "";
+        return new SimpleDateFormat("dd.MM.yyyy").format(date);
     }
 }
 
