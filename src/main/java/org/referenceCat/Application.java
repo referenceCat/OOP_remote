@@ -3,40 +3,36 @@ package org.referenceCat; /**
  * Date: 26/09/2023 01:40
  */
 
+import org.referenceCat.entities.Owner;
+import org.referenceCat.entities.Vehicle;
+import org.referenceCat.entities.Violation;
+import org.referenceCat.exceptions.ValidationException;
+import org.referenceCat.ui.GhostText;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
 import javax.imageio.ImageIO;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-
-import org.referenceCat.exceptions.ValidationException;
-import org.referenceCat.ui.GhostText;
-import java.awt.Color;
-
-
-import javax.persistence.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.referenceCat.entities.Owner;
-import org.referenceCat.entities.Vehicle;
-import org.referenceCat.entities.Violation;
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
-
 import java.util.Date;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.util.List;
 
 
 public class Application {
@@ -51,6 +47,17 @@ public class Application {
 
     public static void main(String[] args) {
         new Application().uiInit();
+    }
+
+    private static void commitTransaction(EntityManager em) {
+        em.getTransaction().commit();
+    }
+
+    private static EntityManager beginTransaction() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        return em;
     }
 
     public void uiInit() {
@@ -102,6 +109,7 @@ public class Application {
             Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             writeXMLButton.setIcon(new ImageIcon(image7));
         } catch (Exception ignored) {
+
         }
 
         searchTextField = new JTextField();
@@ -109,8 +117,6 @@ public class Application {
         searchTextField.setMaximumSize(searchTextField.getPreferredSize());
         GhostText ghostText = new GhostText(searchTextField, "Search");
 
-
-        // Добавление кнопок на панель инструментов
         toolBar = new JToolBar("Tool bar");
         toolBar.setPreferredSize(new Dimension(1000, 50));
 
@@ -172,14 +178,14 @@ public class Application {
         frame.setVisible(true);
 
         addButton.addActionListener(event -> onAddButton());
-        deleteButton.addActionListener (event -> onDeleteButton());
+        deleteButton.addActionListener(event -> onDeleteButton());
 
         reloadButton.addActionListener(event -> updateTable());
         searchButton.addActionListener(event -> {
             try {
                 search();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
                 e.printStackTrace();
             }
         });
@@ -188,7 +194,7 @@ public class Application {
             try {
                 readXML();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
                 e.printStackTrace();
             }
         });
@@ -197,7 +203,7 @@ public class Application {
             try {
                 writeXML();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
                 e.printStackTrace();
             }
         });
@@ -212,16 +218,17 @@ public class Application {
 
     private void search() throws ValidationException {
         System.out.println(searchTextField.getText());
-        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) throw new ValidationException("empty text field");
+        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search"))
+            throw new ValidationException("empty text field");
     }
 
     private void updateTable() {
         EntityManager em = beginTransaction();
-        List<Vehicle> vehicles =em.createQuery("SELECT v FROM Vehicle v").getResultList();
+        List<Vehicle> vehicles = em.createQuery("SELECT v FROM Vehicle v").getResultList();
 
         DefaultTableModel model = (DefaultTableModel) tableVehicles.getModel();
         model.setRowCount(0);
-        for (Vehicle vehicle: vehicles) {
+        for (Vehicle vehicle : vehicles) {
             Owner owner = vehicle.getOwner();
             model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), dateToString(vehicle.getMaintenanceDate()), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
@@ -230,7 +237,7 @@ public class Application {
 
         model = (DefaultTableModel) tableOwners.getModel();
         model.setRowCount(0);
-        for (Owner owner: owners) {
+        for (Owner owner : owners) {
             model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), dateToString(owner.getBirthDate()), owner.getPassportId(), owner.getLicenseId()});
         }
 
@@ -238,7 +245,7 @@ public class Application {
 
         model = (DefaultTableModel) tableViolations.getModel();
         model.setRowCount(0);
-        for (Violation violation: violations) {
+        for (Violation violation : violations) {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = vehicle.getOwner();
             model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
@@ -331,8 +338,9 @@ public class Application {
 
             Date date = new Date();
             try {
-                 parseDate(birthDateInput.getText());
-            } catch (ParseException ignored) {}
+                parseDate(birthDateInput.getText());
+            } catch (ParseException ignored) {
+            }
             owner.setBirthDate(date);
             owner.setPassportId(passportInput.getText());
             owner.setLicenseId(licenseInput.getText());
@@ -344,7 +352,7 @@ public class Application {
 
         } else {
             String[] options = {"Debt", "Jail (10 years)", "Warning", "Deprivation of license"};
-            JComboBox penaltyInput= new JComboBox(options);
+            JComboBox penaltyInput = new JComboBox(options);
             JTextField debtInput = new JTextField();
             JTextField commentaryInput = new JTextField();
             JTextField dateInput = new JTextField();
@@ -368,7 +376,8 @@ public class Application {
                             && isDate(dateInput.getText())
                             && isInteger(vehicleIdInput.getText())) break;
 
-                    if (penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText())) debtInput.setBackground(Color.pink);
+                    if (penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText()))
+                        debtInput.setBackground(Color.pink);
                     if (!isDate(dateInput.getText())) dateInput.setBackground(Color.pink);
                     if (!isInteger(vehicleIdInput.getText())) vehicleIdInput.setBackground(Color.pink);
                 } else return;
@@ -383,7 +392,8 @@ public class Application {
             Date date = new Date();
             try {
                 date = parseDate(dateInput.getText());
-            } catch (ParseException ignored) {}
+            } catch (ParseException ignored) {
+            }
             violation.setDate(date);
 
             EntityManager em = beginTransaction();
@@ -401,7 +411,7 @@ public class Application {
         if (tabs.getSelectedIndex() == 0) {
             indexes = tableVehicles.getSelectedRows();
             for (int index : indexes) {
-                deleteVehilce((Integer) tableVehicles.getValueAt(index, 0));
+                deleteVehicle((Integer) tableVehicles.getValueAt(index, 0));
             }
         } else if (tabs.getSelectedIndex() == 1) {
             indexes = tableOwners.getSelectedRows();
@@ -417,10 +427,10 @@ public class Application {
         updateTable();
     }
 
-    private void deleteVehilce(int id) {
+    private void deleteVehicle(int id) {
         EntityManager em = beginTransaction();
         Vehicle vehicle = em.find(Vehicle.class, id);
-        List<Violation> violations = em.createQuery("SELECT v from Violation v WHERE vehicle_id = " + Integer.toString(vehicle.getId())).getResultList();
+        List<Violation> violations = em.createQuery("SELECT v from Violation v WHERE vehicle_id = " + vehicle.getId()).getResultList();
         for (Violation violation : violations) deleteViolation(violation.getId());
         em.remove(vehicle);
         commitTransaction(em);
@@ -436,12 +446,11 @@ public class Application {
     private void deleteOwner(int id) {
         EntityManager em = beginTransaction();
         Owner owner = em.find(Owner.class, id);
-        List<Vehicle> vehicles = em.createQuery("SELECT v from Vehicle v WHERE owner_id = " + Integer.toString(owner.getId())).getResultList();
-        for (Vehicle vehicle : vehicles) deleteVehilce(vehicle.getId());
+        List<Vehicle> vehicles = em.createQuery("SELECT v from Vehicle v WHERE owner_id = " + owner.getId()).getResultList();
+        for (Vehicle vehicle : vehicles) deleteVehicle(vehicle.getId());
         em.remove(owner);
         commitTransaction(em);
     }
-
 
     private boolean isInteger(String string) {
         try {
@@ -453,9 +462,8 @@ public class Application {
     }
 
     private boolean isRegNumberValid(String string) {
-        if (string.isEmpty()) return false;
+        return !string.isEmpty();
         // TODO
-        return true;
     }
 
     private boolean isDate(String string) {
@@ -480,8 +488,10 @@ public class Application {
             NamedNodeMap attrs = elem.getAttributes();
             Violation violation = new Violation();
             violation.setPenalty(attrs.getNamedItem("penalty").getNodeValue());
-            if (violation.getPenalty().equals("Debt")) violation.setDebt(Integer.parseInt(attrs.getNamedItem("debt").getNodeValue()));
-            if (attrs.getNamedItem("commentary") != null) violation.setCommentary(attrs.getNamedItem("commentary").getNodeValue());
+            if (violation.getPenalty().equals("Debt"))
+                violation.setDebt(Integer.parseInt(attrs.getNamedItem("debt").getNodeValue()));
+            if (attrs.getNamedItem("commentary") != null)
+                violation.setCommentary(attrs.getNamedItem("commentary").getNodeValue());
             violation.setDate(parseDate(attrs.getNamedItem("date").getNodeValue()));
             Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(attrs.getNamedItem("vehicle_id").getNodeValue()));
             violation.setVehicle(vehicle);
@@ -489,17 +499,6 @@ public class Application {
         }
         commitTransaction(em);
         updateTable();
-    }
-
-    private static void commitTransaction(EntityManager em) {
-        em.getTransaction().commit();
-    }
-
-    private static EntityManager beginTransaction() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        return em;
     }
 
     private void writeXML() throws ParserConfigurationException, TransformerException, IOException {
@@ -531,6 +530,7 @@ public class Application {
         java.io.FileWriter fw = new FileWriter("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
         trans.transform(new DOMSource(doc), new StreamResult(fw));
     }
+
     private Date parseDate(String s) throws ParseException {
         return new SimpleDateFormat("dd.MM.yyyy").parse(s);
     }
