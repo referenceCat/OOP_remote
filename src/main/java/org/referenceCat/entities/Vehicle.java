@@ -11,7 +11,7 @@ import java.util.Date;
 @Table(name = "traffic_police_db.vehicles")
 public class Vehicle {
     private int id;
-    private CarOwner owner;
+    private Owner owner;
     private String regNumber, model, color;
     private Date maintenanceDate;
 
@@ -31,11 +31,11 @@ public class Vehicle {
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    public CarOwner getOwner() {
+    public Owner getOwner() {
         return owner;
     }
 
-    public void setOwner(CarOwner owner) {
+    public void setOwner(Owner owner) {
         this.owner = owner;
     }
 

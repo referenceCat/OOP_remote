@@ -11,6 +11,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
 import java.awt.Color;
@@ -18,7 +19,7 @@ import java.awt.Color;
 
 import javax.persistence.*;
 
-import org.referenceCat.entities.CarOwner;
+import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import java.util.Date;
@@ -143,9 +144,9 @@ public class Application {
         frame.setVisible(true);
 
         addButton.addActionListener(event -> onAddButton());
-        deleteButton.addActionListener (event -> JOptionPane.showMessageDialog (frame, "*Плейсхолдер*"));
+        deleteButton.addActionListener (event -> onDeleteButton());
 
-        reloadButton.addActionListener(event -> update_table());
+        reloadButton.addActionListener(event -> updateTable());
         searchButton.addActionListener(event -> {
             try {
                 search();
@@ -153,7 +154,7 @@ public class Application {
                 JOptionPane.showMessageDialog (frame, "Error: ".concat(e.getMessage()));
             }
         });
-        update_table();
+        updateTable();
     }
 
     private void search() throws ValidationException {
@@ -161,7 +162,7 @@ public class Application {
         if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) throw new ValidationException("empty text field");
     }
 
-    private void update_table() {
+    private void updateTable() {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
         EntityManager em = emf.createEntityManager();
 
@@ -171,15 +172,15 @@ public class Application {
         DefaultTableModel model = (DefaultTableModel) tableVehicles.getModel();
         model.setRowCount(0);
         for (Vehicle vehicle: vehicles) {
-            CarOwner owner = vehicle.getOwner();
+            Owner owner = vehicle.getOwner();
             model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), vehicle.getMaintenanceDate(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
 
-        List<CarOwner> owners = em.createQuery("SELECT v FROM CarOwner v").getResultList();
+        List<Owner> owners = em.createQuery("SELECT v FROM Owner v").getResultList();
 
         model = (DefaultTableModel) tableOwners.getModel();
         model.setRowCount(0);
-        for (CarOwner owner: owners) {
+        for (Owner owner: owners) {
             model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), owner.getBirthDate(), owner.getPassportId(), owner.getLicenseId()});
         }
 
@@ -189,7 +190,7 @@ public class Application {
         model.setRowCount(0);
         for (Violation violation: violations) {
             Vehicle vehicle = violation.getVehicle();
-            CarOwner owner = vehicle.getOwner();
+            Owner owner = vehicle.getOwner();
             model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), violation.getDate(), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
     }
@@ -232,7 +233,7 @@ public class Application {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
             EntityManager em = emf.createEntityManager();
             em.getTransaction().begin();
-            CarOwner owner = em.getReference(CarOwner.class, Integer.parseInt(ownerField.getText()));
+            Owner owner = em.getReference(Owner.class, Integer.parseInt(ownerField.getText()));
             vehicle.setOwner(owner);
             em.persist(vehicle);
             em.getTransaction().commit();
@@ -275,7 +276,7 @@ public class Application {
                 } else return;
             }
 
-            CarOwner owner = new CarOwner();
+            Owner owner = new Owner();
             owner.setSurname(surnameInput.getText());
             owner.setName(nameInput.getText());
             if (!patronymicInput.getText().isEmpty()) owner.setPatronymic(patronymicInput.getText());
@@ -348,8 +349,64 @@ public class Application {
             em.getTransaction().commit();
         }
 
-        update_table();
+        updateTable();
     }
+
+    private void onDeleteButton() {
+        int[] indexes;
+        if (tabs.getSelectedIndex() == 0) {
+            indexes = tableVehicles.getSelectedRows();
+            for (int index : indexes) {
+                deleteVehilce((Integer) tableVehicles.getValueAt(index, 0));
+            }
+        } else if (tabs.getSelectedIndex() == 1) {
+            indexes = tableOwners.getSelectedRows();
+            for (int index : indexes) {
+                deleteOwner((Integer) tableOwners.getValueAt(index, 0));
+            }
+        } else {
+            indexes = tableOwners.getSelectedRows();
+            for (int index : indexes) {
+                deleteViolation((Integer) tableViolations.getValueAt(index, 0));
+            }
+        }
+        updateTable();
+    }
+
+    private void deleteVehilce(int id) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+
+        em.getTransaction().begin();
+        Vehicle vehicle = em.find(Vehicle.class, id);
+        List<Violation> violations = em.createQuery("SELECT v from Violation v WHERE vehicle_id = " + Integer.toString(vehicle.getId())).getResultList();
+        for (Violation violation : violations) deleteViolation(violation.getId());
+        em.remove(vehicle);
+        em.getTransaction().commit();
+    }
+
+    private void deleteViolation(int id) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+
+        em.getTransaction().begin();
+        Violation violation = em.find(Violation.class, id);
+        em.remove(violation);
+        em.getTransaction().commit();
+    }
+
+    private void deleteOwner(int id) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+        EntityManager em = emf.createEntityManager();
+
+        em.getTransaction().begin();
+        Owner owner = em.find(Owner.class, id);
+        List<Vehicle> vehicles = em.createQuery("SELECT v from Vehicle v WHERE owner_id = " + Integer.toString(owner.getId())).getResultList();
+        for (Vehicle vehicle : vehicles) deleteVehilce(vehicle.getId());
+        em.remove(owner);
+        em.getTransaction().commit();
+    }
+
 
     private boolean isInteger(String string) {
         try {

@@ -9,10 +9,10 @@ import javax.persistence.Entity;
  */
 
 @Entity
-public class CarOwner extends Person {
+public class Owner extends Person {
     private String licenseId;
 
-    public CarOwner() {
+    public Owner() {
     }
 
     @Column(name = "license_id")
