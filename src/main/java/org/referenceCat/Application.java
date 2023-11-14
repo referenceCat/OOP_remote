@@ -3,11 +3,13 @@ package org.referenceCat; /**
  * Date: 26/09/2023 01:40
  */
 
+import org.apache.fop.apps.*;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
+import org.referenceCat.ui.TestCustomDialog;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -20,15 +22,19 @@ import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -137,7 +143,11 @@ public class Application {
         scrollOwners = new JScrollPane();
 
         String[] columnsVehicles = {"id", "reg number", "model", "color", "maintenance date", "oid", "owner"};
-        modelVehicles = new DefaultTableModel(columnsVehicles, 100);
+        modelVehicles = new DefaultTableModel(columnsVehicles, 100) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            };
+        };
         tableVehicles = new JTable(modelVehicles);
         scrollVehicles = new JScrollPane(tableVehicles);
 
@@ -150,7 +160,11 @@ public class Application {
 
         String[] columnsOwners = {"id", "surname", "name", "patronymic", "birth date", "passport", "license"};
         modelOwners = new DefaultTableModel(columnsOwners, 10);
-        tableOwners = new JTable(modelOwners);
+        tableOwners = new JTable(modelOwners) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            };
+        };
         scrollOwners = new JScrollPane(tableOwners);
 
         tableOwners.getColumnModel().getColumn(0).setMaxWidth(30);
@@ -158,7 +172,11 @@ public class Application {
 
         String[] columnsViolations = {"id", "penalty", "debt", "commentary", "date", "cid", "reg number", "oid", "owner"};
         modelViolations = new DefaultTableModel(columnsViolations, 10);
-        tableViolations = new JTable(modelViolations);
+        tableViolations = new JTable(modelViolations) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            };
+        };
         scrollViolations = new JScrollPane(tableViolations);
 
         tableViolations.getColumnModel().getColumn(0).setMaxWidth(30);
@@ -179,6 +197,17 @@ public class Application {
 
         addButton.addActionListener(event -> onAddButton());
         deleteButton.addActionListener(event -> onDeleteButton());
+        editButton.addActionListener(event -> {
+            try {
+                convertToPDF();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (FOPException e) {
+                throw new RuntimeException(e);
+            } catch (TransformerException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         reloadButton.addActionListener(event -> updateTable());
         searchButton.addActionListener(event -> {
@@ -539,5 +568,53 @@ public class Application {
         if (date == null) return "";
         return new SimpleDateFormat("dd.MM.yyyy").format(date);
     }
+
+    private void testDialog() {
+        TestCustomDialog testCustomDialog = new TestCustomDialog();
+        System.out.println(testCustomDialog.getTitle());
+        testCustomDialog.setButtonListener(e -> {
+            System.out.println("click");
+        });
+        testCustomDialog.show();
+
+    }
+
+    public void convertToPDF() throws IOException, FOPException, TransformerException {
+
+        // todo change xml format
+        // the XSL FO file
+        File xsltFile = new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/src/main/resources/template.xsl");
+        // the XML file which provides the input
+        StreamSource xmlSource = new StreamSource(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml"));
+        // create an instance of fop factory
+        FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+        // a user agent is needed for transformation
+        FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+        // Setup output
+        OutputStream out;
+        out = new java.io.FileOutputStream("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.pdf");
+
+        try {
+            // Construct fop with desired output format
+            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
+
+            // Setup XSLT
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer(new StreamSource(xsltFile));
+
+            // Resulting SAX events (the generated FO) must be piped through to
+            // FOP
+            Result res = new SAXResult(fop.getDefaultHandler());
+
+            // Start XSLT transformation and FOP processing
+            // That's where the XML is first transformed to XSL-FO and then
+            // PDF is created
+            transformer.transform(xmlSource, res);
+        } finally {
+            out.close();
+        }
+
+    }
+
 }
 
