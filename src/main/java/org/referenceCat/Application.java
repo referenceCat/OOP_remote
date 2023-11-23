@@ -521,6 +521,7 @@ public class Application {
     }
 
     private void writeXML() throws ParserConfigurationException, TransformerException, IOException {
+        // todo change format
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.newDocument();
         Node violations = doc.createElement("violations");
@@ -561,6 +562,10 @@ public class Application {
 
     private void testDialog() {
         OwnerDialog ownerDialog = new OwnerDialog(frame);
+        ownerDialog.applyButton.addActionListener(e -> {
+            System.out.println(ownerDialog.surnameInput.getText());
+            ownerDialog.dialog.dispose();
+        });
         ownerDialog.show();
     }
 
