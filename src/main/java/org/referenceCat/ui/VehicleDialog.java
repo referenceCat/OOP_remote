@@ -87,7 +87,7 @@ public class VehicleDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 460);
+        dialog.setSize(455, 350);
         onTextUpdate();
     }
 
@@ -97,7 +97,7 @@ public class VehicleDialog {
         if (regNumberInput.getText().isEmpty()) {
             valid = false;
             regNumberInputLabel.setText("Required field ");
-        } else if (7 > regNumberInputLabel.getText().length() || regNumberInputLabel.getText().length() > 9) {
+        } else if (7 > regNumberInput.getText().length() || regNumberInput.getText().length() > 9) {
             valid = false;
             regNumberInputLabel.setText("Wrong length");
         } else {
@@ -106,7 +106,9 @@ public class VehicleDialog {
 
         if (ownerIdInput.getText().isEmpty()) {
             valid = false;
-            ownerIdInput.setText("Required field ");
+            ownerIdInputLabel.setText("Required field ");
+        } else {
+            ownerIdInputLabel.setText(" ");
         }
 
         applyButton.setEnabled(valid);

@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
@@ -275,156 +276,88 @@ public class Application {
 
     private void onAddButton() {
         if (tabs.getSelectedIndex() == 0) {
-            JTextField registrationField = new JTextField();
-            JTextField modelField = new JTextField();
-            JTextField colorField = new JTextField();
-            JTextField ownerField = new JTextField();
-            final JComponent[] inputs = new JComponent[]{
-                    new JLabel("Registration number: *"),
-                    registrationField,
-                    new JLabel("Model:"),
-                    modelField,
-                    new JLabel("Color:"),
-                    colorField,
-                    new JLabel("Owner id: *"),
-                    ownerField
-            };
-            while (true) {
-                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter vehicle data", JOptionPane.PLAIN_MESSAGE);
-                if (result == JOptionPane.OK_OPTION) {
-                    if (isRegNumberValid(registrationField.getText()) && isInteger(ownerField.getText())) break;
-                    if (!isRegNumberValid(registrationField.getText())) {
-                        registrationField.setBackground(Color.pink);
-                    }
-
-                    if (!isInteger(ownerField.getText())) {
-                        ownerField.setBackground(Color.pink);
-                    }
-                } else return;
-            }
-
-            Vehicle vehicle = new Vehicle();
-            vehicle.setRegNumber(registrationField.getText());
-            if (!modelField.getText().isEmpty()) vehicle.setModel(modelField.getText());
-            if (!colorField.getText().isEmpty()) vehicle.setColor(colorField.getText());
-
-            EntityManager em = beginTransaction();
-            Owner owner = em.getReference(Owner.class, Integer.parseInt(ownerField.getText()));
-            vehicle.setOwner(owner);
-            em.persist(vehicle);
-            commitTransaction(em);
-
+            vehicleAdditionDialog();
         } else if (tabs.getSelectedIndex() == 1) {
-            JTextField surnameInput = new JTextField();
-            JTextField nameInput = new JTextField();
-            JTextField patronymicInput = new JTextField();
-            JTextField birthDateInput = new JTextField();
-            JTextField passportInput = new JTextField();
-            JTextField licenseInput = new JTextField();
-            final JComponent[] inputs = new JComponent[]{
-                    new JLabel("Surname: *"),
-                    surnameInput,
-                    new JLabel("Name: *"),
-                    nameInput,
-                    new JLabel("Patronymic:"),
-                    patronymicInput,
-                    new JLabel("Birth date: *"),
-                    birthDateInput,
-                    new JLabel("Passport number: *"),
-                    passportInput,
-                    new JLabel("License number: *"),
-                    licenseInput
-            };
-            while (true) {
-                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter person's data", JOptionPane.PLAIN_MESSAGE);
-                if (result == JOptionPane.OK_OPTION) {
-                    if (!surnameInput.getText().isEmpty()
-                            && !nameInput.getText().isEmpty()
-                            && isDate(birthDateInput.getText())
-                            && !passportInput.getText().isEmpty()
-                            && !licenseInput.getText().isEmpty()) break;
-
-                    if (surnameInput.getText().isEmpty()) surnameInput.setBackground(Color.pink);
-                    if (nameInput.getText().isEmpty()) nameInput.setBackground(Color.pink);
-                    if (!isDate(birthDateInput.getText())) birthDateInput.setBackground(Color.pink);
-                    if (passportInput.getText().isEmpty()) passportInput.setBackground(Color.pink);
-                    if (licenseInput.getText().isEmpty()) licenseInput.setBackground(Color.pink);
-                } else return;
-            }
-
-            Owner owner = new Owner();
-            owner.setSurname(surnameInput.getText());
-            owner.setName(nameInput.getText());
-            if (!patronymicInput.getText().isEmpty()) owner.setPatronymic(patronymicInput.getText());
-
-            Date date = new Date();
-            try {
-                parseDate(birthDateInput.getText());
-            } catch (ParseException ignored) {
-            }
-            owner.setBirthDate(date);
-            owner.setPassportId(passportInput.getText());
-            owner.setLicenseId(licenseInput.getText());
-
-
-            EntityManager em = beginTransaction();
-            em.persist(owner);
-            commitTransaction(em);
-
+            ownerAdditionDialog();
         } else {
-            String[] options = {"Debt", "Jail (10 years)", "Warning", "Deprivation of license"};
-            JComboBox penaltyInput = new JComboBox(options);
-            JTextField debtInput = new JTextField();
-            JTextField commentaryInput = new JTextField();
-            JTextField dateInput = new JTextField();
-            JTextField vehicleIdInput = new JTextField();
-            final JComponent[] inputs = new JComponent[]{
-                    new JLabel("Penalty: *"),
-                    penaltyInput,
-                    new JLabel("Debt: "),
-                    debtInput,
-                    new JLabel("Commentary:"),
-                    commentaryInput,
-                    new JLabel("Date: *"),
-                    dateInput,
-                    new JLabel("Vehicle id: *"),
-                    vehicleIdInput
-            };
-            while (true) {
-                int result = JOptionPane.showConfirmDialog(null, inputs, "Enter violation data", JOptionPane.PLAIN_MESSAGE);
-                if (result == JOptionPane.OK_OPTION) {
-                    if (!(penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText()))
-                            && isDate(dateInput.getText())
-                            && isInteger(vehicleIdInput.getText())) break;
-
-                    if (penaltyInput.getSelectedIndex() == 0 && !isInteger(debtInput.getText()))
-                        debtInput.setBackground(Color.pink);
-                    if (!isDate(dateInput.getText())) dateInput.setBackground(Color.pink);
-                    if (!isInteger(vehicleIdInput.getText())) vehicleIdInput.setBackground(Color.pink);
-                } else return;
-            }
-
-            Violation violation = new Violation();
-            Vehicle vehicle;
-            violation.setPenalty(options[penaltyInput.getSelectedIndex()]);
-            if (penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(debtInput.getText()));
-            if (!commentaryInput.getText().isEmpty()) violation.setCommentary(commentaryInput.getText());
-
-            Date date = new Date();
-            try {
-                date = parseDate(dateInput.getText());
-            } catch (ParseException ignored) {
-            }
-            violation.setDate(date);
-
-            EntityManager em = beginTransaction();
-            vehicle = em.getReference(Vehicle.class, Integer.parseInt(vehicleIdInput.getText()));
-            violation.setVehicle(vehicle);
-            em.persist(violation);
-            commitTransaction(em);
+            violationAdditionDialog();
         }
+    }
 
-        updateTable();
+    private void vehicleAdditionDialog() {
+        VehicleDialog vehicleDialog = new VehicleDialog(frame);
+        vehicleDialog.applyButton.addActionListener(e -> {
+            try {
+                Vehicle vehicle = new Vehicle();
+                vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
+                if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
+                if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
+
+                EntityManager em = beginTransaction();
+                Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
+                if (owner == null) throw new PersistenceException("Owner not found");
+                vehicle.setOwner(owner);
+                em.persist(vehicle);
+                commitTransaction(em);
+                vehicleDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        vehicleDialog.show();
+    }
+
+    private void ownerAdditionDialog() {
+        OwnerDialog ownerDialog = new OwnerDialog(frame);
+        ownerDialog.applyButton.addActionListener(e -> {
+            try {
+                Owner owner = new Owner();
+                owner.setSurname(ownerDialog.surnameInput.getText());
+                owner.setName(ownerDialog.nameInput.getText());
+                if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
+                owner.setBirthDate(parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setPassportId(ownerDialog.patronymicInput.getText());
+                owner.setLicenseId(ownerDialog.licenseInput.getText());
+
+                EntityManager em = beginTransaction();
+                em.persist(owner);
+                commitTransaction(em);
+                ownerDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        ownerDialog.show();
+    }
+
+    private void violationAdditionDialog() {
+        ViolationDialog violationDialog = new ViolationDialog(frame);
+        violationDialog.applyButton.addActionListener(e -> {
+            try {
+                Violation violation = new Violation();
+                violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
+                if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
+                if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
+                violation.setDate(parseDate(violationDialog.dateInput.getText()));
+
+                EntityManager em = beginTransaction();
+                Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
+                if (vehicle == null) throw new PersistenceException("Owner not found");
+                violation.setVehicle(vehicle);
+                em.persist(violation);
+                commitTransaction(em);
+                violationDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        violationDialog.show();
     }
 
     private void onDeleteButton() {
