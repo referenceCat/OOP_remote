@@ -9,7 +9,7 @@ import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
-import org.referenceCat.ui.TestCustomDialog;
+import org.referenceCat.ui.OwnerDialog;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -197,17 +197,7 @@ public class Application {
 
         addButton.addActionListener(event -> onAddButton());
         deleteButton.addActionListener(event -> onDeleteButton());
-        editButton.addActionListener(event -> {
-            try {
-                convertToPDF();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (FOPException e) {
-                throw new RuntimeException(e);
-            } catch (TransformerException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        editButton.addActionListener(event -> testDialog());
 
         reloadButton.addActionListener(event -> updateTable());
         searchButton.addActionListener(event -> {
@@ -570,13 +560,8 @@ public class Application {
     }
 
     private void testDialog() {
-        TestCustomDialog testCustomDialog = new TestCustomDialog();
-        System.out.println(testCustomDialog.getTitle());
-        testCustomDialog.setButtonListener(e -> {
-            System.out.println("click");
-        });
-        testCustomDialog.show();
-
+        OwnerDialog ownerDialog = new OwnerDialog(frame);
+        ownerDialog.show();
     }
 
     public void convertToPDF() throws IOException, FOPException, TransformerException {

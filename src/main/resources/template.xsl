@@ -39,7 +39,7 @@
                                     </fo:table-cell>
                                     <fo:table-cell>
                                         <fo:block>
-                                            <xsl:value-of select="penaltry"/>
+                                            <xsl:value-of select="penalty"/>
                                         </fo:block>
                                     </fo:table-cell>
                                     <fo:table-cell>
