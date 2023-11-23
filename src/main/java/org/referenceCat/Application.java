@@ -10,6 +10,8 @@ import org.referenceCat.entities.Violation;
 import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
 import org.referenceCat.ui.OwnerDialog;
+import org.referenceCat.ui.VehicleDialog;
+import org.referenceCat.ui.ViolationDialog;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -561,12 +563,12 @@ public class Application {
     }
 
     private void testDialog() {
-        OwnerDialog ownerDialog = new OwnerDialog(frame);
-        ownerDialog.applyButton.addActionListener(e -> {
-            System.out.println(ownerDialog.surnameInput.getText());
-            ownerDialog.dialog.dispose();
+        ViolationDialog violationDialog = new ViolationDialog(frame);
+        violationDialog.applyButton.addActionListener(e -> {
+            System.out.println(violationDialog.penaltyInput.getSelectedIndex());
+            violationDialog.dialog.dispose();
         });
-        ownerDialog.show();
+        violationDialog.show();
     }
 
     public void convertToPDF() throws IOException, FOPException, TransformerException {
