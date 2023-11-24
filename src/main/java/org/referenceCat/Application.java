@@ -55,7 +55,7 @@ public class Application {
     private DefaultTableModel modelVehicles, modelOwners, modelViolations;
 
     public static void main(String[] args) {
-        new Application().uiInit();
+        new Application().initGUI();
     }
 
     private static void commitTransaction(EntityManager em) {
@@ -69,7 +69,7 @@ public class Application {
         return em;
     }
 
-    public void uiInit() {
+    public void initGUI() {
         frame = new JFrame("Traffic Police database");
         frame.setSize(1500, 900);
         frame.setLocation(100, 100);
@@ -187,7 +187,7 @@ public class Application {
     private void initListeners() {
         addButton.addActionListener(event -> onAddButton());
         deleteButton.addActionListener(event -> onDeleteButton());
-        editButton.addActionListener(event -> testDialog());
+        editButton.addActionListener(event -> onEditButton());
 
         reloadButton.addActionListener(event -> updateTable());
         searchButton.addActionListener(event -> {
@@ -330,7 +330,7 @@ public class Application {
                 owner.setName(ownerDialog.nameInput.getText());
                 if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
                 owner.setBirthDate(parseDate(ownerDialog.birthDateInput.getText()));
-                owner.setPassportId(ownerDialog.patronymicInput.getText());
+                owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
 
                 EntityManager em = beginTransaction();
@@ -372,6 +372,121 @@ public class Application {
         violationDialog.show();
     }
 
+    private void onEditButton() {
+        if (tabs.getSelectedIndex() == 0) {
+            vehicleEditingDialog();
+        } else if (tabs.getSelectedIndex() == 1) {
+            ownerEditingDialog();
+        } else {
+            violationEditingDialog();
+        }
+    }
+
+    private void vehicleEditingDialog() {
+
+        int selectedRow = tableVehicles.getSelectedRow();
+        if (selectedRow == -1) return;
+
+        VehicleDialog vehicleDialog = new VehicleDialog(frame);
+        vehicleDialog.regNumberInput.setText((String) tableVehicles.getValueAt(selectedRow, 1));
+        vehicleDialog.modelInput.setText((String) tableVehicles.getValueAt(selectedRow, 2));
+        vehicleDialog.colorInput.setText((String) tableVehicles.getValueAt(selectedRow, 3));
+        vehicleDialog.ownerIdInput.setText(((Integer) tableVehicles.getValueAt(selectedRow, 5)).toString());
+        vehicleDialog.applyButton.addActionListener(e -> {
+            try {
+                EntityManager em = beginTransaction();
+                Vehicle vehicle = em.find(Vehicle.class, (Integer) tableVehicles.getValueAt(selectedRow, 0));
+                if (vehicle == null) throw new PersistenceException("Owner not found");
+                vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
+                if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
+                if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
+
+
+                Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
+                if (owner == null) throw new PersistenceException("Owner not found");
+                vehicle.setOwner(owner);
+                em.merge(vehicle);
+                commitTransaction(em);
+                vehicleDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        vehicleDialog.show();
+    }
+
+    private void ownerEditingDialog() {
+        int selectedRow = tableOwners.getSelectedRow();
+        if (selectedRow == -1) return;
+
+        OwnerDialog ownerDialog = new OwnerDialog(frame);
+        ownerDialog.surnameInput.setText((String) tableOwners.getValueAt(selectedRow, 1));
+        ownerDialog.nameInput.setText((String) tableOwners.getValueAt(selectedRow, 2));
+        ownerDialog.patronymicInput.setText((String) tableOwners.getValueAt(selectedRow, 3));
+        ownerDialog.birthDateInput.setText((String) tableOwners.getValueAt(selectedRow, 4));
+        ownerDialog.passportInput.setText((String) tableOwners.getValueAt(selectedRow, 5));
+        ownerDialog.licenseInput.setText((String) tableOwners.getValueAt(selectedRow, 6));
+        ownerDialog.applyButton.addActionListener(e -> {
+            try {
+                EntityManager em = beginTransaction();
+                Owner owner = em.find(Owner.class, (Integer) tableOwners.getValueAt(selectedRow, 0));
+                if (owner == null) throw new PersistenceException("Owner not found");
+                owner.setSurname(ownerDialog.surnameInput.getText());
+                owner.setName(ownerDialog.nameInput.getText());
+                if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
+                owner.setBirthDate(parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setPassportId(ownerDialog.passportInput.getText());
+                owner.setLicenseId(ownerDialog.licenseInput.getText());
+                em.merge(owner);
+                commitTransaction(em);
+                ownerDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        ownerDialog.show();
+    }
+
+    private void violationEditingDialog() {
+
+        int selectedRow = tableViolations.getSelectedRow();
+        if (selectedRow == -1) return;
+
+        ViolationDialog violationDialog = new ViolationDialog(frame);
+
+        violationDialog.penaltyInput.setSelectedItem((String) tableViolations.getValueAt(selectedRow, 1));
+        violationDialog.debtInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 2)).toString());
+        violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 3));
+        violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
+        violationDialog.vehicleIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 5)).toString());
+        violationDialog.applyButton.addActionListener(e -> {
+            try {
+                EntityManager em = beginTransaction();
+                Violation violation = em.find(Violation.class, tableViolations.getValueAt(selectedRow, 0));
+                if (violation == null) throw new PersistenceException("Owner not found");
+                violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
+                if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
+                if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
+                violation.setDate(parseDate(violationDialog.dateInput.getText()));
+
+                Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
+                if (vehicle == null) throw new PersistenceException("Owner not found");
+                violation.setVehicle(vehicle);
+                em.persist(violation);
+                commitTransaction(em);
+                violationDialog.dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                updateTable();
+            }
+        });
+        violationDialog.show();
+    }
     private void onDeleteButton() {
         int[] indexes;
         if (tabs.getSelectedIndex() == 0) {
