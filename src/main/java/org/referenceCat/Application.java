@@ -74,7 +74,17 @@ public class Application {
         frame.setSize(1500, 900);
         frame.setLocation(100, 100);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
+        initToolBar();
+        initTables();
+        initListeners();
+        updateTable();
+
+        frame.setVisible(true);
+    }
+
+    private void initToolBar() {
         addButton = new JButton();
         addButton.setToolTipText("Add");
 
@@ -96,31 +106,6 @@ public class Application {
         writeXMLButton = new JButton();
         writeXMLButton.setToolTipText("Write XML");
 
-        try {
-            Image image1 = ImageIO.read(new File("src/main/resources/ui/plus.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            addButton.setIcon(new ImageIcon(image1));
-
-            Image image2 = ImageIO.read(new File("src/main/resources/ui/minus.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            deleteButton.setIcon(new ImageIcon(image2));
-
-            Image image3 = ImageIO.read(new File("src/main/resources/ui/editing.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            editButton.setIcon(new ImageIcon(image3));
-
-            Image image4 = ImageIO.read(new File("src/main/resources/ui/search.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            searchButton.setIcon(new ImageIcon(image4));
-
-            Image image5 = ImageIO.read(new File("src/main/resources/ui/reload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            reloadButton.setIcon(new ImageIcon(image5));
-
-            Image image6 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            readXMLButton.setIcon(new ImageIcon(image6));
-
-            Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
-            writeXMLButton.setIcon(new ImageIcon(image7));
-        } catch (Exception ignored) {
-
-        }
-
         searchTextField = new JTextField();
         searchTextField.setPreferredSize(new Dimension(400, 42));
         searchTextField.setMaximumSize(searchTextField.getPreferredSize());
@@ -138,9 +123,11 @@ public class Application {
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(searchTextField);
         toolBar.add(searchButton);
-        frame.setLayout(new BorderLayout());
+        initButtonIcons();
         frame.add(toolBar, BorderLayout.NORTH);
+    }
 
+    private void initTables() {
         scrollVehicles = new JScrollPane();
         scrollViolations = new JScrollPane();
         scrollOwners = new JScrollPane();
@@ -195,9 +182,9 @@ public class Application {
         tabs.add("Violations", scrollViolations);
         tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         frame.add(tabs);
+    }
 
-        frame.setVisible(true);
-
+    private void initListeners() {
         addButton.addActionListener(event -> onAddButton());
         deleteButton.addActionListener(event -> onDeleteButton());
         editButton.addActionListener(event -> testDialog());
@@ -234,8 +221,33 @@ public class Application {
         tabs.addChangeListener(e -> {
             writeXMLButton.setEnabled(tabs.getSelectedIndex() == 2);
         });
+    }
 
-        updateTable();
+    private void initButtonIcons() {
+        try {
+            Image image1 = ImageIO.read(new File("src/main/resources/ui/plus.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            addButton.setIcon(new ImageIcon(image1));
+
+            Image image2 = ImageIO.read(new File("src/main/resources/ui/minus.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            deleteButton.setIcon(new ImageIcon(image2));
+
+            Image image3 = ImageIO.read(new File("src/main/resources/ui/editing.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            editButton.setIcon(new ImageIcon(image3));
+
+            Image image4 = ImageIO.read(new File("src/main/resources/ui/search.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            searchButton.setIcon(new ImageIcon(image4));
+
+            Image image5 = ImageIO.read(new File("src/main/resources/ui/reload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            reloadButton.setIcon(new ImageIcon(image5));
+
+            Image image6 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            readXMLButton.setIcon(new ImageIcon(image6));
+
+            Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            writeXMLButton.setIcon(new ImageIcon(image7));
+        } catch (Exception ignored) {
+
+        }
     }
 
     private void search() throws ValidationException {
