@@ -15,10 +15,12 @@ public class VehicleDialog {
     public JTextField regNumberInput;
     public JTextField modelInput;
     public JTextField colorInput;
+    public JTextField maintenanceDateInput;
     public JTextField ownerIdInput;
     public JLabel regNumberInputLabel;
     public JLabel modelInputLabel;
-    public JLabel colorInputLable;
+    public JLabel colorInputLabel;
+    public JLabel maintenanceDateInputLabel;
     public JLabel ownerIdInputLabel;
 
 
@@ -30,22 +32,26 @@ public class VehicleDialog {
         regNumberInput = new JTextField(40);
         modelInput = new JTextField(40);
         colorInput = new JTextField(40);
+        maintenanceDateInput = new JTextField(40);
         ownerIdInput = new JTextField(40);
         applyButton = new JButton("Apply");
 
         regNumberInputLabel = new JLabel(" ");
         modelInputLabel = new JLabel(" ");
-        colorInputLable = new JLabel(" ");
+        colorInputLabel = new JLabel(" ");
+        maintenanceDateInputLabel = new JLabel(" ");
         ownerIdInputLabel = new JLabel(" ");
 
         regNumberInputLabel.setForeground(Color.RED);
         modelInputLabel.setForeground(Color.RED);
-        colorInputLable.setForeground(Color.RED);
+        colorInputLabel.setForeground(Color.RED);
+        maintenanceDateInputLabel.setForeground(Color.RED);
         ownerIdInputLabel.setForeground(Color.RED);
 
         regNumberInputLabel.setFont(new Font("Times New Roman", Font.ITALIC, 12));
         modelInputLabel.setFont(new Font("Times New Roman", Font.ITALIC, 12));
-        colorInputLable.setFont(new Font("Times New Roman", Font.ITALIC, 12));
+        colorInputLabel.setFont(new Font("Times New Roman", Font.ITALIC, 12));
+        maintenanceDateInputLabel.setFont(new Font("Times New Roman", Font.ITALIC, 12));
         ownerIdInputLabel.setFont(new Font("Times New Roman", Font.ITALIC, 12));
 
         applyButton = new JButton("Apply");
@@ -69,8 +75,16 @@ public class VehicleDialog {
 
         panel.add(new JLabel("Color:"));
         panel.add(colorInput);
-        panel.add(colorInputLable);
+        panel.add(colorInputLabel);
         colorInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
+            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
+            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
+            onTextUpdate();}});
+
+        panel.add(new JLabel("Maintenance date:"));
+        panel.add(maintenanceDateInput);
+        panel.add(maintenanceDateInputLabel);
+        maintenanceDateInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
             onTextUpdate();} public void removeUpdate(DocumentEvent e) {
             onTextUpdate();} public void insertUpdate(DocumentEvent e) {
             onTextUpdate();}});
@@ -89,7 +103,7 @@ public class VehicleDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 330);
+        dialog.setSize(455, 395);
         onTextUpdate();
     }
 
@@ -104,6 +118,12 @@ public class VehicleDialog {
             validationResponse = Utilities.regNumberValidation(regNumberInput.getText());
             valid &= validationResponse.isValid;
             regNumberInputLabel.setText(validationResponse.message);
+        }
+
+        if (!maintenanceDateInput.getText().isEmpty()) {
+            validationResponse = Utilities.dateValidation(maintenanceDateInput.getText());
+            valid &= validationResponse.isValid;
+            maintenanceDateInputLabel.setText(validationResponse.message);
         }
 
         validationResponse = Utilities.requiredFieldCheck(ownerIdInput.getText());

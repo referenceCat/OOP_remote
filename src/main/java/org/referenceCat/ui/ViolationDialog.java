@@ -118,13 +118,6 @@ public class ViolationDialog {
             debtInputLabel.setText(" ");
         }
 
-        if (dateInputLabel.getText().isEmpty()) {
-            valid = false;
-            dateInputLabel.setText("Required field ");
-        } else {
-            dateInputLabel.setText(" ");
-        }
-
         validationResponse = Utilities.requiredFieldCheck(dateInput.getText());
         dateInputLabel.setText(validationResponse.message);
         valid &= validationResponse.isValid;

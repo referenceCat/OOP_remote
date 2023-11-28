@@ -306,6 +306,8 @@ public class Application {
                 if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
 
+                vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
+
                 EntityManager em = beginTransaction();
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
                 if (owner == null) throw new PersistenceException("Owner not found");
@@ -392,6 +394,7 @@ public class Application {
         vehicleDialog.regNumberInput.setText((String) tableVehicles.getValueAt(selectedRow, 1));
         vehicleDialog.modelInput.setText((String) tableVehicles.getValueAt(selectedRow, 2));
         vehicleDialog.colorInput.setText((String) tableVehicles.getValueAt(selectedRow, 3));
+        vehicleDialog.maintenanceDateInput.setText((String) tableVehicles.getValueAt(selectedRow, 4));
         vehicleDialog.ownerIdInput.setText(((Integer) tableVehicles.getValueAt(selectedRow, 5)).toString());
         vehicleDialog.applyButton.addActionListener(e -> {
             try {
@@ -401,6 +404,9 @@ public class Application {
                 vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
                 if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
+                vehicle.setMaintenanceDate(null);
+                if (!vehicleDialog.maintenanceDateInput.getText().isEmpty()) vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
+
 
 
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
@@ -534,6 +540,7 @@ public class Application {
         em.remove(owner);
         commitTransaction(em);
     }
+
 
     private void readXML() throws ParserConfigurationException, IOException, SAXException, ParseException {
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
