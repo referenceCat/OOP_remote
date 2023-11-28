@@ -11,8 +11,7 @@ public class ViolationDialog {
     public JDialog dialog;
     public JPanel panel;
     public JButton applyButton;
-
-    private final String[] options = {"Debt", "Jail (10 years)", "Warning", "Deprivation of license"};
+    private final String[] options = {"Debt", "Jail (20 years)", "Warning", "Deprivation of license"};
     public JComboBox penaltyInput;
     public JTextField debtInput;
     public JTextField commentaryInput;
@@ -98,7 +97,7 @@ public class ViolationDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 460);
+        dialog.setSize(455, 410);
         onTextUpdate();
     }
 
