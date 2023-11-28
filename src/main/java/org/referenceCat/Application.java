@@ -42,6 +42,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+
 import org.referenceCat.utils.Utilities;
 
 
@@ -54,6 +57,8 @@ public class Application {
     private JScrollPane scrollVehicles, scrollOwners, scrollViolations;
     private JTable tableVehicles, tableOwners, tableViolations;
     private DefaultTableModel modelVehicles, modelOwners, modelViolations;
+
+    final static Logger logger = Logger.getLogger(Application.class);
 
     public static void main(String[] args) {
         new Application().initGUI();
@@ -83,6 +88,7 @@ public class Application {
         updateTable();
 
         frame.setVisible(true);
+        logger.info("Frame is open");
     }
 
     private void initToolBar() {
