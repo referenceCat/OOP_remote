@@ -42,6 +42,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import org.referenceCat.utils.Utilities;
 
 
 public class Application {
@@ -264,7 +265,7 @@ public class Application {
         model.setRowCount(0);
         for (Vehicle vehicle : vehicles) {
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), dateToString(vehicle.getMaintenanceDate()), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), Utilities.dateToString(vehicle.getMaintenanceDate()), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
 
         List<Owner> owners = em.createQuery("SELECT v FROM Owner v").getResultList();
@@ -272,7 +273,7 @@ public class Application {
         model = (DefaultTableModel) tableOwners.getModel();
         model.setRowCount(0);
         for (Owner owner : owners) {
-            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), dateToString(owner.getBirthDate()), owner.getPassportId(), owner.getLicenseId()});
+            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), Utilities.dateToString(owner.getBirthDate()), owner.getPassportId(), owner.getLicenseId()});
         }
 
         List<Violation> violations = em.createQuery("SELECT v FROM Violation v").getResultList();
@@ -282,7 +283,7 @@ public class Application {
         for (Violation violation : violations) {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
     }
 
@@ -329,7 +330,7 @@ public class Application {
                 owner.setSurname(ownerDialog.surnameInput.getText());
                 owner.setName(ownerDialog.nameInput.getText());
                 if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
-                owner.setBirthDate(parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
 
@@ -354,7 +355,7 @@ public class Application {
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
                 if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
                 if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
-                violation.setDate(parseDate(violationDialog.dateInput.getText()));
+                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
 
                 EntityManager em = beginTransaction();
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
@@ -436,7 +437,7 @@ public class Application {
                 owner.setSurname(ownerDialog.surnameInput.getText());
                 owner.setName(ownerDialog.nameInput.getText());
                 if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
-                owner.setBirthDate(parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
                 em.merge(owner);
@@ -471,7 +472,7 @@ public class Application {
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
                 if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
                 if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
-                violation.setDate(parseDate(violationDialog.dateInput.getText()));
+                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
 
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
                 if (vehicle == null) throw new PersistenceException("Owner not found");
@@ -487,6 +488,7 @@ public class Application {
         });
         violationDialog.show();
     }
+
     private void onDeleteButton() {
         int[] indexes;
         if (tabs.getSelectedIndex() == 0) {
@@ -533,29 +535,6 @@ public class Application {
         commitTransaction(em);
     }
 
-    private boolean isInteger(String string) {
-        try {
-            Integer.parseInt(string);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private boolean isRegNumberValid(String string) {
-        return !string.isEmpty();
-        // TODO
-    }
-
-    private boolean isDate(String string) {
-        try {
-            parseDate(string);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
-    }
-
     private void readXML() throws ParserConfigurationException, IOException, SAXException, ParseException {
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = dBuilder.parse(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml"));
@@ -573,7 +552,7 @@ public class Application {
                 violation.setDebt(Integer.parseInt(attrs.getNamedItem("debt").getNodeValue()));
             if (attrs.getNamedItem("commentary") != null)
                 violation.setCommentary(attrs.getNamedItem("commentary").getNodeValue());
-            violation.setDate(parseDate(attrs.getNamedItem("date").getNodeValue()));
+            violation.setDate(Utilities.parseDate(attrs.getNamedItem("date").getNodeValue()));
             Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(attrs.getNamedItem("vehicle_id").getNodeValue()));
             violation.setVehicle(vehicle);
             em.persist(violation);
@@ -605,7 +584,7 @@ public class Application {
             if (violation.getPenalty().equals("Debt")) item.setAttribute("debt", Integer.toString(violation.getDebt()));
             if (violation.getCommentary() != null) item.setAttribute("commentary", violation.getCommentary());
             item.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
-            item.setAttribute("date", dateToString(violation.getDate()));
+            item.setAttribute("date", Utilities.dateToString(violation.getDate()));
         }
 
         Transformer trans = TransformerFactory.newInstance().newTransformer();
@@ -613,14 +592,7 @@ public class Application {
         trans.transform(new DOMSource(doc), new StreamResult(fw));
     }
 
-    private Date parseDate(String s) throws ParseException {
-        return new SimpleDateFormat("dd.MM.yyyy").parse(s);
-    }
 
-    private String dateToString(Date date) {
-        if (date == null) return "";
-        return new SimpleDateFormat("dd.MM.yyyy").format(date);
-    }
 
     private void testDialog() {
         ViolationDialog violationDialog = new ViolationDialog(frame);

@@ -1,5 +1,7 @@
 package org.referenceCat.ui;
 
+import org.referenceCat.utils.Utilities;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -123,43 +125,44 @@ public class OwnerDialog {
 
     private void onTextUpdate() {
         boolean valid = true;
+        Utilities.ValidationResponse validationResponse;
 
-        if (surnameInput.getText().isEmpty()) {
-            valid = false;
-            surnameInputLabel.setText("Required field ");
-        } else if (surnameInputLabel.getText().length() > 200) {
-            valid = false;
-            surnameInputLabel.setText("Too big ");
-        } else {
-            surnameInputLabel.setText(" ");
+        validationResponse = Utilities.requiredFieldCheck(surnameInput.getText());
+        valid &= validationResponse.isValid;
+        surnameInputLabel.setText(validationResponse.message);
+
+        validationResponse = Utilities.requiredFieldCheck(nameInput.getText());
+        valid &= validationResponse.isValid;
+        nameInputLabel.setText(validationResponse.message);
+
+        validationResponse = Utilities.requiredFieldCheck(passportInput.getText());
+        passportInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid) {
+            validationResponse = Utilities.passportValidation(passportInput.getText());
+            valid &= validationResponse.isValid;
+            passportInputLabel.setText(validationResponse.message);
         }
 
-        if (nameInput.getText().isEmpty()) {
-            valid = false;
-            nameInputLabel.setText("Required field ");
-        } else if (nameInput.getText().length() > 200) {
-            valid = false;
-            nameInputLabel.setText("Too big ");
-        } else {
-            nameInputLabel.setText(" ");
+        validationResponse = Utilities.requiredFieldCheck(licenseInput.getText());
+        licenseInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid) {
+            validationResponse = Utilities.licenseValidation(licenseInput.getText());
+            valid &= validationResponse.isValid;
+            licenseInputLabel.setText(validationResponse.message);
         }
 
-        if (patronymicInput.getText().length() > 200) {
-            valid = false;
-            patronymicInputLabel.setText("Too big ");
-        } else {
-            patronymicInputLabel.setText(" ");
-        }
-
-        if (passportInput.getText().isEmpty()) {
-            valid = false;
-            passportInputLabel.setText("Required field ");
-        } else {
-            passportInputLabel.setText(" ");
+        validationResponse = Utilities.requiredFieldCheck(birthDateInput.getText());
+        birthDateInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid) {
+            validationResponse = Utilities.dateValidation(birthDateInput.getText());
+            valid &= validationResponse.isValid;
+            birthDateInputLabel.setText(validationResponse.message);
         }
 
         applyButton.setEnabled(valid);
-        // todo other validations
     }
 
     public void show() {

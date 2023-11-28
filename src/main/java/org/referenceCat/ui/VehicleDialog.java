@@ -1,5 +1,7 @@
 package org.referenceCat.ui;
 
+import org.referenceCat.utils.Utilities;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -93,26 +95,26 @@ public class VehicleDialog {
 
     private void onTextUpdate() {
         boolean valid = true;
+        Utilities.ValidationResponse validationResponse;
 
-        if (regNumberInput.getText().isEmpty()) {
-            valid = false;
-            regNumberInputLabel.setText("Required field ");
-        } else if (7 > regNumberInput.getText().length() || regNumberInput.getText().length() > 9) {
-            valid = false;
-            regNumberInputLabel.setText("Wrong length");
-        } else {
-            regNumberInputLabel.setText(" ");
+        validationResponse = Utilities.requiredFieldCheck(regNumberInput.getText());
+        regNumberInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid) {
+            validationResponse = Utilities.regNumberValidation(regNumberInput.getText());
+            valid &= validationResponse.isValid;
+            regNumberInputLabel.setText(validationResponse.message);
         }
 
-        if (ownerIdInput.getText().isEmpty()) {
+        validationResponse = Utilities.requiredFieldCheck(ownerIdInput.getText());
+        ownerIdInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid && !Utilities.isInteger(ownerIdInput.getText())) {
             valid = false;
-            ownerIdInputLabel.setText("Required field ");
-        } else {
-            ownerIdInputLabel.setText(" ");
+            ownerIdInputLabel.setText("Must be Integer");
         }
 
         applyButton.setEnabled(valid);
-        // todo other validations
     }
 
     public void show() {

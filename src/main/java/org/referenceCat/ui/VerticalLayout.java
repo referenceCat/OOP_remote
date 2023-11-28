@@ -28,7 +28,7 @@ class VerticalLayout implements LayoutManager
     public void layoutContainer(Container container)
     {
         // Список компонентов
-        Component list[] = container.getComponents();
+        Component[] list = container.getComponents();
         int currentY = 5;
         for (int i = 0; i < list.length; i++) {
             // Определение предпочтительного размера компонента

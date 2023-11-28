@@ -1,5 +1,7 @@
 package org.referenceCat.ui;
 
+import org.referenceCat.utils.Utilities;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -75,7 +77,7 @@ public class ViolationDialog {
             onTextUpdate();}});
 
 
-        panel.add(new JLabel("Date and time:"));
+        panel.add(new JLabel("Date:"));
         panel.add(dateInput);
         panel.add(dateInputLabel);
         dateInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
@@ -103,21 +105,18 @@ public class ViolationDialog {
     private void onTextUpdate() {
         debtInput.setEnabled(penaltyInput.getSelectedIndex() == 0);
         boolean valid = true;
+        Utilities.ValidationResponse validationResponse;
 
-        System.out.println(penaltyInput.getSelectedIndex() == 0);
-        System.out.println(debtInput.getText().isEmpty());
+        applyButton.setEnabled(valid);
+
         if ((penaltyInput.getSelectedIndex() == 0) && debtInput.getText().isEmpty()) {
             valid = false;
             debtInputLabel.setText("Required field if penalty is debt");
+        } else if (!Utilities.isInteger(debtInput.getText())) {
+            valid = false;
+            debtInputLabel.setText("Must be integer");
         } else {
             debtInputLabel.setText(" ");
-        }
-
-        if (commentaryInput.getText().length() > 200) {
-            valid = false;
-            commentaryInputLabel.setText("Too big ");
-        } else {
-            commentaryInputLabel.setText(" ");
         }
 
         if (dateInputLabel.getText().isEmpty()) {
@@ -127,8 +126,25 @@ public class ViolationDialog {
             dateInputLabel.setText(" ");
         }
 
+        validationResponse = Utilities.requiredFieldCheck(dateInput.getText());
+        dateInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid) {
+            validationResponse = Utilities.dateValidation(dateInput.getText());
+            valid &= validationResponse.isValid;
+            dateInputLabel.setText(validationResponse.message);
+        }
+
+        validationResponse = Utilities.requiredFieldCheck(vehicleIdInput.getText());
+        vehicleIdInputLabel.setText(validationResponse.message);
+        valid &= validationResponse.isValid;
+        if (validationResponse.isValid && !Utilities.isInteger(vehicleIdInput.getText())) {
+            valid = false;
+            vehicleIdInputLabel.setText("Must be Integer");
+        }
+
+
         applyButton.setEnabled(valid);
-        // todo other validations
     }
 
     public void show() {
