@@ -89,7 +89,7 @@ public class VehicleDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 350);
+        dialog.setSize(455, 330);
         onTextUpdate();
     }
 
