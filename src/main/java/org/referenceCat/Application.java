@@ -541,7 +541,6 @@ public class Application {
         commitTransaction(em);
     }
 
-
     private void readXML() throws ParserConfigurationException, IOException, SAXException, ParseException {
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = dBuilder.parse(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml"));
@@ -598,8 +597,6 @@ public class Application {
         java.io.FileWriter fw = new FileWriter("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
         trans.transform(new DOMSource(doc), new StreamResult(fw));
     }
-
-
 
     private void testDialog() {
         ViolationDialog violationDialog = new ViolationDialog(frame);
