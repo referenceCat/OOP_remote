@@ -134,6 +134,7 @@ public class Application {
         toolBar.add(searchButton);
         initButtonIcons();
         frame.add(toolBar, BorderLayout.NORTH);
+        logger.info("Tool bar initialized");
     }
 
     private void initTables() {
@@ -191,6 +192,8 @@ public class Application {
         tabs.add("Violations", scrollViolations);
         tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         frame.add(tabs);
+
+        logger.info("Tables initialized");
     }
 
     private void initListeners() {
@@ -204,6 +207,7 @@ public class Application {
                 search();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                logger.error("Exception ", e);
                 e.printStackTrace();
             }
         });
@@ -213,6 +217,7 @@ public class Application {
                 readXML();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                logger.error("Exception ", e);
                 e.printStackTrace();
             }
         });
@@ -222,6 +227,7 @@ public class Application {
                 writeXML();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                logger.error("Exception ", e);
                 e.printStackTrace();
             }
         });
@@ -253,6 +259,7 @@ public class Application {
 //                }
 //            }
 //        });
+        logger.info("Listeners initialized");
     }
 
     private void initButtonIcons() {
@@ -277,8 +284,10 @@ public class Application {
 
             Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             writeXMLButton.setIcon(new ImageIcon(image7));
-        } catch (Exception ignored) {
 
+            logger.info("Button images initialized");
+        } catch (Exception e) {
+            logger.error("Exception ", e);
         }
     }
 
@@ -328,6 +337,7 @@ public class Application {
             }
         }
         searchTextField.setText("");
+        logger.info("Search completed");
     }
 
     private void updateTable() {
@@ -362,6 +372,7 @@ public class Application {
         tableVehicles.setRowHeight(16);
         tableOwners.setRowHeight(16);
         tableViolations.setRowHeight(16);
+        logger.info("Table updated");
     }
 
     private void onAddButton() {
@@ -394,6 +405,7 @@ public class Application {
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
@@ -419,6 +431,7 @@ public class Application {
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
@@ -445,6 +458,7 @@ public class Application {
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
@@ -494,6 +508,7 @@ public class Application {
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
@@ -503,7 +518,10 @@ public class Application {
 
     private void ownerEditingDialog() {
         int selectedRow = tableOwners.getSelectedRow();
-        if (selectedRow == -1) return;
+        if (selectedRow == -1) {
+            logger.debug("Empty selection");
+            return;
+        }
 
         OwnerDialog ownerDialog = new OwnerDialog(frame);
         ownerDialog.surnameInput.setText((String) tableOwners.getValueAt(selectedRow, 1));
@@ -528,6 +546,7 @@ public class Application {
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
@@ -538,7 +557,10 @@ public class Application {
     private void violationEditingDialog() {
 
         int selectedRow = tableViolations.getSelectedRow();
-        if (selectedRow == -1) return;
+        if (selectedRow == -1) {
+            logger.debug("Empty selection");
+            return;
+        }
 
         ViolationDialog violationDialog = new ViolationDialog(frame);
 
@@ -565,6 +587,7 @@ public class Application {
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
             } finally {
                 updateTable();
             }
