@@ -34,6 +34,8 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -228,6 +230,29 @@ public class Application {
         tabs.addChangeListener(e -> {
             writeXMLButton.setEnabled(tabs.getSelectedIndex() == 2);
         });
+
+//        frame.addKeyListener(new KeyListener() {
+//            @Override
+//            public void keyTyped(KeyEvent e) {
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER && !searchTextField.getText().isEmpty()) {
+//                    search();
+//                }
+//            }
+//
+//            @Override
+//            public void keyPressed(KeyEvent e) {
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER && !searchTextField.getText().isEmpty()) {
+//                    search();
+//                }
+//            }
+//
+//            @Override
+//            public void keyReleased(KeyEvent e) {
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER && !searchTextField.getText().isEmpty()) {
+//                    search();
+//                }
+//            }
+//        });
     }
 
     private void initButtonIcons() {
@@ -257,10 +282,52 @@ public class Application {
         }
     }
 
-    private void search() throws ValidationException {
-        System.out.println(searchTextField.getText());
-        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search"))
-            throw new ValidationException("empty text field");
+    private void search() {
+        tableVehicles.setRowHeight(16);
+        tableOwners.setRowHeight(16);
+        tableViolations.setRowHeight(16);
+        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) return;
+        if (tabs.getSelectedIndex() == 0) {
+
+            for (int i = 0; i < tableVehicles.getRowCount(); i++) {
+                if (!Integer.toString((Integer) tableVehicles.getValueAt(i, 0)).contains(searchTextField.getText()) &&
+                        !((String) tableVehicles.getValueAt(i, 1)).contains(searchTextField.getText()) &&
+                        !((String) tableVehicles.getValueAt(i, 2)).contains(searchTextField.getText()) &&
+                        !((String) tableVehicles.getValueAt(i, 3)).contains(searchTextField.getText()) &&
+                        !((String) tableVehicles.getValueAt(i, 4)).contains(searchTextField.getText()) &&
+                        !Integer.toString((Integer) tableVehicles.getValueAt(i, 5)).contains(searchTextField.getText()) &&
+                        !((String) tableVehicles.getValueAt(i, 6)).contains(searchTextField.getText())) {
+                    tableVehicles.setRowHeight(i, 1);
+                }
+            }
+        } else if (tabs.getSelectedIndex() == 1) {
+            for (int i = 0; i < tableOwners.getRowCount(); i++) {
+                if (!Integer.toString((Integer) tableOwners.getValueAt(i, 0)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 1)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 2)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 4)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 5)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 6)).contains(searchTextField.getText()) &&
+                        !((String) tableOwners.getValueAt(i, 6)).contains(searchTextField.getText())) {
+                    tableOwners.setRowHeight(i, 1);
+                }
+            }
+        } else {
+            for (int i = 0; i < tableViolations.getRowCount(); i++) {
+                if (!Integer.toString((Integer) tableViolations.getValueAt(i, 0)).contains(searchTextField.getText()) &&
+                        !((String) tableViolations.getValueAt(i, 1)).contains(searchTextField.getText()) &&
+                        !Integer.toString((Integer) tableViolations.getValueAt(i, 2)).contains(searchTextField.getText()) &&
+                        !((String) tableViolations.getValueAt(i, 3)).contains(searchTextField.getText()) &&
+                        !((String) tableViolations.getValueAt(i, 4)).contains(searchTextField.getText()) &&
+                        !Integer.toString((Integer) tableViolations.getValueAt(i, 5)).contains(searchTextField.getText()) &&
+                        !((String) tableViolations.getValueAt(i, 6)).contains(searchTextField.getText()) &&
+                        !Integer.toString((Integer) tableViolations.getValueAt(i, 7)).contains(searchTextField.getText()) &&
+                        !((String) tableViolations.getValueAt(i, 8)).contains(searchTextField.getText())) {
+                    tableViolations.setRowHeight(i, 1);
+                }
+            }
+        }
+        searchTextField.setText("");
     }
 
     private void updateTable() {
@@ -291,6 +358,10 @@ public class Application {
             Owner owner = vehicle.getOwner();
             model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
+
+        tableVehicles.setRowHeight(16);
+        tableOwners.setRowHeight(16);
+        tableViolations.setRowHeight(16);
     }
 
     private void onAddButton() {

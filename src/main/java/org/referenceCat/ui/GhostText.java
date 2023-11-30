@@ -58,7 +58,7 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     }
 
     private void updateState() {
-        isEmpty = textfield.getText().length() == 0;
+        isEmpty = textfield.getText().isEmpty();
         foregroundColor = textfield.getForeground();
     }
 
