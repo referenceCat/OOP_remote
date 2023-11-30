@@ -206,9 +206,8 @@ public class Application {
             try {
                 search();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
-                e.printStackTrace();
             }
         });
 
@@ -216,9 +215,8 @@ public class Application {
             try {
                 readXML();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
-                e.printStackTrace();
             }
         });
 
@@ -226,9 +224,8 @@ public class Application {
             try {
                 writeXML();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Error: ".concat(e.getMessage()));
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
-                e.printStackTrace();
             }
         });
 
@@ -404,7 +401,7 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -430,7 +427,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -451,13 +448,13 @@ public class Application {
 
                 EntityManager em = beginTransaction();
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
-                if (vehicle == null) throw new PersistenceException("Owner not found");
+                if (vehicle == null) throw new PersistenceException("Vehicle not found");
                 violation.setVehicle(vehicle);
                 em.persist(violation);
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -507,7 +504,7 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -545,7 +542,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -586,7 +583,7 @@ public class Application {
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, ex.getStackTrace(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
