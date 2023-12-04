@@ -222,7 +222,7 @@ public class Application {
 
         writeXMLButton.addActionListener(event -> {
             try {
-                writeXML();
+                writeXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
@@ -664,60 +664,84 @@ public class Application {
         updateTable();
     }
 
-    private void writeXML() throws ParserConfigurationException, TransformerException, IOException {
+    private void writeXML(String pathToResult) throws ParserConfigurationException, TransformerException, IOException {
         // todo change format
+
+        int[] ids;
+        ids = tableViolations.getSelectedRows();
+        if (ids.length == 0) {
+            ids = new int[tableViolations.getRowCount()];
+            for (int i = 0; i < tableViolations.getRowCount(); i++) ids[i] = i;
+        }
+
+        writeXMLbyId(pathToResult, ids);
+    }
+
+    private void writeXMLbyId(String pathToResult, int[] ids) throws ParserConfigurationException, IOException, TransformerException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.newDocument();
         Node violations = doc.createElement("violations");
         doc.appendChild(violations);
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
         EntityManager em = emf.createEntityManager();
-        int[] indexes;
-        indexes = tableViolations.getSelectedRows();
-        if (indexes.length == 0) {
-            indexes = new int[tableViolations.getRowCount()];
-            for (int i = 0; i < tableViolations.getRowCount(); i++) indexes[i] = i;
-        }
-        for (int index : indexes) {
-            Violation violation = em.find(Violation.class, tableViolations.getValueAt(index, 0));
-            Element item = doc.createElement("violation");
-            violations.appendChild(item);
-            item.setAttribute("id", Integer.toString(violation.getId()));
-            item.setAttribute("penalty", violation.getPenalty());
-            if (violation.getPenalty().equals("Debt")) item.setAttribute("debt", Integer.toString(violation.getDebt()));
-            if (violation.getCommentary() != null) item.setAttribute("commentary", violation.getCommentary());
-            item.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
-            item.setAttribute("date", Utilities.dateToString(violation.getDate()));
+        for (int id : ids) {
+            Violation violation = em.find(Violation.class, tableViolations.getValueAt(id, 0));
+            Element violationItem = doc.createElement("violation");
+            Element subitem;
+            violations.appendChild(violationItem);
+
+            subitem = doc.createElement("id");
+            subitem.setTextContent(Integer.toString(violation.getId()));
+            violationItem.appendChild(subitem);
+
+            subitem = doc.createElement("penalty");
+            subitem.setTextContent(violation.getPenalty());
+            violationItem.appendChild(subitem);
+
+            if (violation.getPenalty().equals("Debt")) {
+                subitem = doc.createElement("debt");
+                subitem.setTextContent(Integer.toString(violation.getDebt()));
+                violationItem.appendChild(subitem);
+            }
+
+            if (violation.getCommentary() != null) {
+                // violationItem.setAttribute("commentary", violation.getCommentary());
+                subitem = doc.createElement("commentary");
+                subitem.setTextContent(violation.getCommentary());
+                violationItem.appendChild(subitem);
+            }
+
+            // violationItem.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
+            subitem = doc.createElement("vehicle_id");
+            subitem.setTextContent(Integer.toString(violation.getVehicle().getId()));
+            violationItem.appendChild(subitem);
+
+            // violationItem.setAttribute("date", Utilities.dateToString(violation.getDate()));
+            subitem = doc.createElement("date");
+            subitem.setTextContent(Utilities.dateToString(violation.getDate()));
+            violationItem.appendChild(subitem);
         }
 
         Transformer trans = TransformerFactory.newInstance().newTransformer();
-        java.io.FileWriter fw = new FileWriter("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
+        FileWriter fw = new FileWriter(pathToResult);
         trans.transform(new DOMSource(doc), new StreamResult(fw));
     }
 
-    private void testDialog() {
-        ViolationDialog violationDialog = new ViolationDialog(frame);
-        violationDialog.applyButton.addActionListener(e -> {
-            System.out.println(violationDialog.penaltyInput.getSelectedIndex());
-            violationDialog.dialog.dispose();
-        });
-        violationDialog.show();
-    }
-
-    public void convertToPDF() throws IOException, FOPException, TransformerException {
+    public void convertToPDF(String pathToSourceXML, String pathToResult) throws IOException, FOPException, TransformerException {
 
         // todo change xml format
         // the XSL FO file
         File xsltFile = new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/src/main/resources/template.xsl");
         // the XML file which provides the input
-        StreamSource xmlSource = new StreamSource(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml"));
+        StreamSource xmlSource = new StreamSource(new File(pathToSourceXML));
         // create an instance of fop factory
         FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
         // a user agent is needed for transformation
         FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
         // Setup output
         OutputStream out;
-        out = new java.io.FileOutputStream("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.pdf");
+        out = new java.io.FileOutputStream(pathToResult);
 
         try {
             // Construct fop with desired output format
