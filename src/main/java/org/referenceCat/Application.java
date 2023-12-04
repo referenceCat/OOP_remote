@@ -7,10 +7,7 @@ import org.apache.fop.apps.*;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
-import org.referenceCat.ui.GhostText;
-import org.referenceCat.ui.OwnerDialog;
-import org.referenceCat.ui.VehicleDialog;
-import org.referenceCat.ui.ViolationDialog;
+import org.referenceCat.ui.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -38,6 +35,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -257,7 +257,15 @@ public class Application {
 //                }
 //            }
 //        })
-        pdfButton.addActionListener(e -> makeReport());
+        pdfButton.addActionListener(e -> {
+            try {
+                onReportButton();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
+            };
+        });
+
         logger.info("Listeners initialized");
     }
 
@@ -693,7 +701,10 @@ public class Application {
         ids = tableViolations.getSelectedRows();
         if (ids.length == 0) {
             ids = new int[tableViolations.getRowCount()];
-            for (int i = 0; i < tableViolations.getRowCount(); i++) ids[i] = i;
+            for (int i = 0; i < tableViolations.getRowCount(); i++);
+        }
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = (int) tableViolations.getValueAt(i, 0);
         }
 
         writeXMLbyId(pathToResult, ids);
@@ -708,7 +719,7 @@ public class Application {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
         EntityManager em = emf.createEntityManager();
         for (int id : ids) {
-            Violation violation = em.find(Violation.class, tableViolations.getValueAt(id, 0));
+            Violation violation = em.find(Violation.class, id);
             Element violationItem = doc.createElement("violation");
             Element subitem;
             violations.appendChild(violationItem);
@@ -782,6 +793,44 @@ public class Application {
         } finally {
             out.close();
         }
+    }
+
+    private static Date addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
+    }
+
+    private void onReportButton() {
+        ReportDialog reportDialog = new ReportDialog(frame);
+        reportDialog.dateInput1.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
+        reportDialog.dateInput2.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
+        reportDialog.applyButton.addActionListener(e -> {
+            try {
+                Date from = Utilities.parseDate(reportDialog.dateInput1.getText());
+                Date to = Utilities.parseDate(reportDialog.dateInput2.getText());
+                Date date;
+
+                ArrayList<Integer> ids = new ArrayList<>();
+                for (int i = 0; i < tableViolations.getRowCount(); i++) {
+                    date = Utilities.parseDate((String) tableViolations.getValueAt(i, 4));
+                    if (!date.before(from) && !date.after(to)) ids.add((Integer) tableViolations.getValueAt(i, 0));
+                }
+                int[] arr = ids.stream().mapToInt(i -> i).toArray();
+                writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
+                convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
+                        "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception ", ex);
+            } finally {
+                updateTable();
+            }
+        });
+        reportDialog.show();
     }
 
 }
