@@ -44,6 +44,8 @@ import org.apache.log4j.Logger;
 
 import org.referenceCat.utils.Utilities;
 
+import static java.lang.Thread.sleep;
+
 
 public class Application {
     private JFrame frame;
@@ -809,20 +811,59 @@ public class Application {
         reportDialog.dateInput2.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
         reportDialog.applyButton.addActionListener(e -> {
             try {
-                Date from = Utilities.parseDate(reportDialog.dateInput1.getText());
-                Date to = Utilities.parseDate(reportDialog.dateInput2.getText());
-                Date date;
+                Object mutex = new Object();
+                Thread threadWriteToBuffer = new Thread(() -> {
+                    synchronized (mutex) {
+                        System.out.println("thread 1 starts");
+                        logger.debug("thread 1 starts");
+                        try {
+                            sleep(100); // todo
+                            Date from = Utilities.parseDate(reportDialog.dateInput1.getText());
+                            Date to = Utilities.parseDate(reportDialog.dateInput2.getText());
+                            Date date;
 
-                ArrayList<Integer> ids = new ArrayList<>();
-                for (int i = 0; i < tableViolations.getRowCount(); i++) {
-                    date = Utilities.parseDate((String) tableViolations.getValueAt(i, 4));
-                    if (!date.before(from) && !date.after(to)) ids.add((Integer) tableViolations.getValueAt(i, 0));
-                }
-                int[] arr = ids.stream().mapToInt(i -> i).toArray();
-                writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
-                convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
-                        "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
+                            ArrayList<Integer> ids = new ArrayList<>();
+                            for (int i = 0; i < tableViolations.getRowCount(); i++) {
+                                date = Utilities.parseDate((String) tableViolations.getValueAt(i, 4));
+                                if (!date.before(from) && !date.after(to)) ids.add((Integer) tableViolations.getValueAt(i, 0));
+                            }
+                            int[] arr = ids.stream().mapToInt(i -> i).toArray();
+                            writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
+                            mutex.notifyAll();
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                            logger.error("Exception ", ex);
+                        }
+                        System.out.println("thread 1 ends");
+                        logger.debug("thread 1 ends");
+                    }
+                });
 
+                Thread threadWriteToPdf = new Thread(() -> {
+                    synchronized (mutex) {
+                        try {
+                            mutex.wait();
+                        } catch (InterruptedException ignored) {}
+                        System.out.println("thread 2 starts");
+                        logger.debug("thread 2 starts");
+                        try {
+                            sleep(1000); // todo
+                            convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
+                                    "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
+                        } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                        logger.error("Exception ", ex);
+                    }
+                        System.out.println("thread 2 ends");
+                        logger.debug("thread 2 ends");
+                    }
+
+                });
+
+                threadWriteToPdf.start();
+                threadWriteToBuffer.start();
+
+                reportDialog.dialog.dispose();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
