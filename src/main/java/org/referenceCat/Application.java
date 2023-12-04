@@ -7,7 +7,6 @@ import org.apache.fop.apps.*;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
-import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.GhostText;
 import org.referenceCat.ui.OwnerDialog;
 import org.referenceCat.ui.VehicleDialog;
@@ -34,15 +33,11 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -52,7 +47,7 @@ import org.referenceCat.utils.Utilities;
 
 public class Application {
     private JFrame frame;
-    private JButton addButton, deleteButton, editButton, searchButton, reloadButton, readXMLButton, writeXMLButton;
+    private JButton addButton, deleteButton, editButton, searchButton, reloadButton, readXMLButton, writeXMLButton, pdfButton;
     private JTextField searchTextField;
     private JToolBar toolBar;
     private JTabbedPane tabs;
@@ -115,6 +110,9 @@ public class Application {
         writeXMLButton = new JButton();
         writeXMLButton.setToolTipText("Write XML");
 
+        pdfButton = new JButton();
+        pdfButton.setToolTipText("Make pdf");
+
         searchTextField = new JTextField();
         searchTextField.setPreferredSize(new Dimension(400, 42));
         searchTextField.setMaximumSize(searchTextField.getPreferredSize());
@@ -129,6 +127,7 @@ public class Application {
         toolBar.add(reloadButton);
         toolBar.add(readXMLButton);
         toolBar.add(writeXMLButton);
+        toolBar.add(pdfButton);
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(searchTextField);
         toolBar.add(searchButton);
@@ -213,7 +212,7 @@ public class Application {
 
         readXMLButton.addActionListener(event -> {
             try {
-                readXML();
+                readXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
@@ -230,7 +229,9 @@ public class Application {
         });
 
         writeXMLButton.setEnabled(false);
+        readXMLButton.setEnabled(false);
         tabs.addChangeListener(e -> {
+            readXMLButton.setEnabled(tabs.getSelectedIndex() == 2);
             writeXMLButton.setEnabled(tabs.getSelectedIndex() == 2);
         });
 
@@ -255,8 +256,21 @@ public class Application {
 //                    search();
 //                }
 //            }
-//        });
+//        })
+        pdfButton.addActionListener(e -> makeReport());
         logger.info("Listeners initialized");
+    }
+
+    private void makeReport() {
+        try {
+            writeXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml");
+            convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
+                    "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+            logger.error("Exception ", e);
+        }
+
     }
 
     private void initButtonIcons() {
@@ -276,11 +290,14 @@ public class Application {
             Image image5 = ImageIO.read(new File("src/main/resources/ui/reload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             reloadButton.setIcon(new ImageIcon(image5));
 
-            Image image6 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            Image image6 = ImageIO.read(new File("src/main/resources/ui/load.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             readXMLButton.setIcon(new ImageIcon(image6));
 
-            Image image7 = ImageIO.read(new File("src/main/resources/ui/xml-file-format-symbol.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            Image image7 = ImageIO.read(new File("src/main/resources/ui/upload.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
             writeXMLButton.setIcon(new ImageIcon(image7));
+
+            Image image8 = ImageIO.read(new File("src/main/resources/ui/pdf-file.png")).getScaledInstance(30, 30, Image.SCALE_DEFAULT);
+            pdfButton.setIcon(new ImageIcon(image8));
 
             logger.info("Button images initialized");
         } catch (Exception e) {
@@ -638,25 +655,32 @@ public class Application {
         commitTransaction(em);
     }
 
-    private void readXML() throws ParserConfigurationException, IOException, SAXException, ParseException {
+    private Node findNode(NodeList nodelist, String s) {
+        for (int i = 0; i < nodelist.getLength(); i++) {
+            if (nodelist.item(i).getNodeName().equals(s)) return nodelist.item(i);
+        }
+        return null;
+    }
+
+    private void readXML(String path) throws ParserConfigurationException, IOException, SAXException, ParseException {
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = dBuilder.parse(new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml"));
+        Document doc = dBuilder.parse(new File(path));
         doc.getDocumentElement().normalize();
 
         EntityManager em = beginTransaction();
 
         NodeList nlViolations = doc.getElementsByTagName("violation");
-        for (int temp = 0; temp < nlViolations.getLength(); temp++) {
-            Node elem = nlViolations.item(temp);
-            NamedNodeMap attrs = elem.getAttributes();
+        for (int i = 0; i < nlViolations.getLength(); i++) {
+            Node elem = nlViolations.item(i);
+            NodeList subnodes = elem.getChildNodes();
             Violation violation = new Violation();
-            violation.setPenalty(attrs.getNamedItem("penalty").getNodeValue());
+            violation.setPenalty(findNode(subnodes, "penalty").getTextContent());
             if (violation.getPenalty().equals("Debt"))
-                violation.setDebt(Integer.parseInt(attrs.getNamedItem("debt").getNodeValue()));
-            if (attrs.getNamedItem("commentary") != null)
-                violation.setCommentary(attrs.getNamedItem("commentary").getNodeValue());
-            violation.setDate(Utilities.parseDate(attrs.getNamedItem("date").getNodeValue()));
-            Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(attrs.getNamedItem("vehicle_id").getNodeValue()));
+                violation.setDebt(Integer.parseInt(findNode(subnodes, "debt").getTextContent()));
+            if (findNode(subnodes, "commentary").getTextContent()!= null)
+                violation.setCommentary(findNode(subnodes, "commentary").getTextContent());
+            violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent()));
+            Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(findNode(subnodes, "vehicle_id").getTextContent()));
             violation.setVehicle(vehicle);
             em.persist(violation);
         }
@@ -665,8 +689,6 @@ public class Application {
     }
 
     private void writeXML(String pathToResult) throws ParserConfigurationException, TransformerException, IOException {
-        // todo change format
-
         int[] ids;
         ids = tableViolations.getSelectedRows();
         if (ids.length == 0) {
@@ -729,8 +751,6 @@ public class Application {
     }
 
     public void convertToPDF(String pathToSourceXML, String pathToResult) throws IOException, FOPException, TransformerException {
-
-        // todo change xml format
         // the XSL FO file
         File xsltFile = new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/src/main/resources/template.xsl");
         // the XML file which provides the input
@@ -762,7 +782,6 @@ public class Application {
         } finally {
             out.close();
         }
-
     }
 
 }
