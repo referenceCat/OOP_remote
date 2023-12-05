@@ -207,7 +207,7 @@ public class Application {
             try {
                 search();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
             }
         });
@@ -216,7 +216,7 @@ public class Application {
             try {
                 readXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml");
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
             }
         });
@@ -225,7 +225,7 @@ public class Application {
             try {
                 writeXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", e);
             }
         });
@@ -263,7 +263,7 @@ public class Application {
             try {
                 onReportButton();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             };
         });
@@ -428,8 +428,8 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+                logger.error("Exception", ex);
             } finally {
                 updateTable();
             }
@@ -454,7 +454,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -481,7 +481,7 @@ public class Application {
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -531,7 +531,7 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -569,7 +569,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -610,7 +610,7 @@ public class Application {
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
@@ -831,7 +831,7 @@ public class Application {
                             writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
                             mutex.notifyAll();
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Something went wrong " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                             logger.error("Exception ", ex);
                         }
                         System.out.println("thread 1 ends");
@@ -851,7 +851,7 @@ public class Application {
                             convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
                                     "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
                         } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                         logger.error("Exception ", ex);
                     }
                         System.out.println("thread 2 ends");
@@ -865,7 +865,7 @@ public class Application {
 
                 reportDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
             } finally {
                 updateTable();
