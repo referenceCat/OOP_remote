@@ -1,14 +1,20 @@
-package org.referenceCat; /**
+/**
  * Author: Mikhail Buyanov
  * Date: 26/09/2023 01:40
  */
+package org.referenceCat;
 
 import org.apache.fop.apps.*;
+import org.apache.log4j.Logger;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
 import org.referenceCat.ui.*;
-import org.w3c.dom.*;
+import org.referenceCat.utils.Utilities;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
@@ -40,24 +46,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import org.referenceCat.utils.Utilities;
-
 import static java.lang.Thread.sleep;
 
 
 public class Application {
+    final static Logger logger = Logger.getLogger(Application.class);
     private JFrame frame;
     private JButton addButton, deleteButton, editButton, searchButton, reloadButton, readXMLButton, writeXMLButton, pdfButton;
     private JTextField searchTextField;
     private JToolBar toolBar;
     private JTabbedPane tabs;
-    private JScrollPane scrollVehicles, scrollOwners, scrollViolations;
     private JTable tableVehicles, tableOwners, tableViolations;
-    private DefaultTableModel modelVehicles, modelOwners, modelViolations;
-
-    final static Logger logger = Logger.getLogger(Application.class);
+    private DefaultTableModel modelOwners;
+    private DefaultTableModel modelViolations;
 
     public static void main(String[] args) {
         new Application().initGUI();
@@ -72,6 +73,13 @@ public class Application {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         return em;
+    }
+
+    private static Date addDays(Date date, int days) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
     }
 
     public void initGUI() {
@@ -139,15 +147,16 @@ public class Application {
     }
 
     private void initTables() {
-        scrollVehicles = new JScrollPane();
-        scrollViolations = new JScrollPane();
-        scrollOwners = new JScrollPane();
+        JScrollPane scrollVehicles = new JScrollPane();
+        JScrollPane scrollViolations = new JScrollPane();
+        JScrollPane scrollOwners = new JScrollPane();
 
         String[] columnsVehicles = {"id", "reg number", "model", "color", "maintenance date", "oid", "owner"};
-        modelVehicles = new DefaultTableModel(columnsVehicles, 100) {
+        DefaultTableModel modelVehicles = new DefaultTableModel(columnsVehicles, 100) {
             public boolean isCellEditable(int row, int column) {
                 return false;
-            };
+            }
+
         };
         tableVehicles = new JTable(modelVehicles);
         scrollVehicles = new JScrollPane(tableVehicles);
@@ -164,7 +173,8 @@ public class Application {
         tableOwners = new JTable(modelOwners) {
             public boolean isCellEditable(int row, int column) {
                 return false;
-            };
+            }
+
         };
         scrollOwners = new JScrollPane(tableOwners);
 
@@ -176,7 +186,8 @@ public class Application {
         tableViolations = new JTable(modelViolations) {
             public boolean isCellEditable(int row, int column) {
                 return false;
-            };
+            }
+
         };
         scrollViolations = new JScrollPane(tableViolations);
 
@@ -265,7 +276,7 @@ public class Application {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
                 logger.error("Exception ", ex);
-            };
+            }
         });
 
         logger.info("Listeners initialized");
@@ -444,7 +455,8 @@ public class Application {
                 Owner owner = new Owner();
                 owner.setSurname(ownerDialog.surnameInput.getText());
                 owner.setName(ownerDialog.nameInput.getText());
-                if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
+                if (!ownerDialog.patronymicInput.getText().isEmpty())
+                    owner.setPatronymic(ownerDialog.patronymicInput.getText());
                 owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
@@ -469,8 +481,10 @@ public class Application {
             try {
                 Violation violation = new Violation();
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
-                if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
-                if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
+                if (violationDialog.penaltyInput.getSelectedIndex() == 0)
+                    violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
+                if (!violationDialog.commentaryInput.getText().isEmpty())
+                    violation.setCommentary(violationDialog.commentaryInput.getText());
                 violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
 
                 EntityManager em = beginTransaction();
@@ -514,14 +528,14 @@ public class Application {
         vehicleDialog.applyButton.addActionListener(e -> {
             try {
                 EntityManager em = beginTransaction();
-                Vehicle vehicle = em.find(Vehicle.class, (Integer) tableVehicles.getValueAt(selectedRow, 0));
+                Vehicle vehicle = em.find(Vehicle.class, tableVehicles.getValueAt(selectedRow, 0));
                 if (vehicle == null) throw new PersistenceException("Owner not found");
                 vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
                 if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
                 vehicle.setMaintenanceDate(null);
-                if (!vehicleDialog.maintenanceDateInput.getText().isEmpty()) vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
-
+                if (!vehicleDialog.maintenanceDateInput.getText().isEmpty())
+                    vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
 
 
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
@@ -557,11 +571,12 @@ public class Application {
         ownerDialog.applyButton.addActionListener(e -> {
             try {
                 EntityManager em = beginTransaction();
-                Owner owner = em.find(Owner.class, (Integer) tableOwners.getValueAt(selectedRow, 0));
+                Owner owner = em.find(Owner.class, tableOwners.getValueAt(selectedRow, 0));
                 if (owner == null) throw new PersistenceException("Owner not found");
                 owner.setSurname(ownerDialog.surnameInput.getText());
                 owner.setName(ownerDialog.nameInput.getText());
-                if (!ownerDialog.patronymicInput.getText().isEmpty()) owner.setPatronymic(ownerDialog.patronymicInput.getText());
+                if (!ownerDialog.patronymicInput.getText().isEmpty())
+                    owner.setPatronymic(ownerDialog.patronymicInput.getText());
                 owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
@@ -588,7 +603,7 @@ public class Application {
 
         ViolationDialog violationDialog = new ViolationDialog(frame);
 
-        violationDialog.penaltyInput.setSelectedItem((String) tableViolations.getValueAt(selectedRow, 1));
+        violationDialog.penaltyInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 1));
         violationDialog.debtInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 2)).toString());
         violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 3));
         violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
@@ -599,8 +614,10 @@ public class Application {
                 Violation violation = em.find(Violation.class, tableViolations.getValueAt(selectedRow, 0));
                 if (violation == null) throw new PersistenceException("Owner not found");
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
-                if (violationDialog.penaltyInput.getSelectedIndex() == 0) violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
-                if (!violationDialog.commentaryInput.getText().isEmpty()) violation.setCommentary(violationDialog.commentaryInput.getText());
+                if (violationDialog.penaltyInput.getSelectedIndex() == 0)
+                    violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
+                if (!violationDialog.commentaryInput.getText().isEmpty())
+                    violation.setCommentary(violationDialog.commentaryInput.getText());
                 violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
 
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
@@ -687,7 +704,7 @@ public class Application {
             violation.setPenalty(findNode(subnodes, "penalty").getTextContent());
             if (violation.getPenalty().equals("Debt"))
                 violation.setDebt(Integer.parseInt(findNode(subnodes, "debt").getTextContent()));
-            if (findNode(subnodes, "commentary").getTextContent()!= null)
+            if (findNode(subnodes, "commentary").getTextContent() != null)
                 violation.setCommentary(findNode(subnodes, "commentary").getTextContent());
             violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent()));
             Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(findNode(subnodes, "vehicle_id").getTextContent()));
@@ -703,7 +720,7 @@ public class Application {
         ids = tableViolations.getSelectedRows();
         if (ids.length == 0) {
             ids = new int[tableViolations.getRowCount()];
-            for (int i = 0; i < tableViolations.getRowCount(); i++);
+            for (int i = 0; i < tableViolations.getRowCount(); i++) ;
         }
         for (int i = 0; i < ids.length; i++) {
             ids[i] = (int) tableViolations.getValueAt(i, 0);
@@ -797,14 +814,6 @@ public class Application {
         }
     }
 
-    private static Date addDays(Date date, int days)
-    {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, days); //minus number would decrement the days
-        return cal.getTime();
-    }
-
     private void onReportButton() {
         ReportDialog reportDialog = new ReportDialog(frame);
         reportDialog.dateInput1.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
@@ -817,7 +826,7 @@ public class Application {
                         System.out.println("thread 1 starts");
                         logger.debug("thread 1 starts");
                         try {
-                            sleep(100); // todo
+                            sleep(100);
                             Date from = Utilities.parseDate(reportDialog.dateInput1.getText());
                             Date to = Utilities.parseDate(reportDialog.dateInput2.getText());
                             Date date;
@@ -825,7 +834,8 @@ public class Application {
                             ArrayList<Integer> ids = new ArrayList<>();
                             for (int i = 0; i < tableViolations.getRowCount(); i++) {
                                 date = Utilities.parseDate((String) tableViolations.getValueAt(i, 4));
-                                if (!date.before(from) && !date.after(to)) ids.add((Integer) tableViolations.getValueAt(i, 0));
+                                if (!date.before(from) && !date.after(to))
+                                    ids.add((Integer) tableViolations.getValueAt(i, 0));
                             }
                             int[] arr = ids.stream().mapToInt(i -> i).toArray();
                             writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
@@ -843,17 +853,18 @@ public class Application {
                     synchronized (mutex) {
                         try {
                             mutex.wait();
-                        } catch (InterruptedException ignored) {}
+                        } catch (InterruptedException ignored) {
+                        }
                         System.out.println("thread 2 starts");
                         logger.debug("thread 2 starts");
                         try {
-                            sleep(1000); // todo
+                            sleep(1000);
                             convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
                                     "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
                         } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                        logger.error("Exception ", ex);
-                    }
+                            JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+                            logger.error("Exception ", ex);
+                        }
                         System.out.println("thread 2 ends");
                         logger.debug("thread 2 ends");
                     }

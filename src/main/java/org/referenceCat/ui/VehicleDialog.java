@@ -59,44 +59,89 @@ public class VehicleDialog {
         panel.add(new JLabel("Registration number: *"));
         panel.add(regNumberInput);
         panel.add(regNumberInputLabel);
-        regNumberInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        regNumberInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         panel.add(new JLabel("Model:"));
         panel.add(modelInput);
         panel.add(modelInputLabel);
-        modelInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        modelInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Color:"));
         panel.add(colorInput);
         panel.add(colorInputLabel);
-        colorInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        colorInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         panel.add(new JLabel("Maintenance date:"));
         panel.add(maintenanceDateInput);
         panel.add(maintenanceDateInputLabel);
-        maintenanceDateInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        maintenanceDateInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Owner's id: *"));
         panel.add(ownerIdInput);
         panel.add(ownerIdInputLabel);
-        ownerIdInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        ownerIdInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(applyButton);

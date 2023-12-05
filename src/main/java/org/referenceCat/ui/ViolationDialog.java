@@ -11,7 +11,6 @@ public class ViolationDialog {
     public JDialog dialog;
     public JPanel panel;
     public JButton applyButton;
-    private final String[] options = {"Debt", "Jail (20 years)", "Warning", "Deprivation of license"};
     public JComboBox penaltyInput;
     public JTextField debtInput;
     public JTextField commentaryInput;
@@ -28,6 +27,7 @@ public class ViolationDialog {
         panel = new JPanel(layout);
         dialog = new JDialog(frame);
 
+        String[] options = {"Debt", "Jail (20 years)", "Warning", "Deprivation of license"};
         penaltyInput = new JComboBox(options);
         panel.add(new JLabel("Penalty: "));
         panel.add(penaltyInput);
@@ -62,36 +62,72 @@ public class ViolationDialog {
         panel.add(new JLabel("Debt:"));
         panel.add(debtInput);
         panel.add(debtInputLabel);
-        debtInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        debtInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         panel.add(new JLabel("Commentary:"));
         panel.add(commentaryInput);
         panel.add(commentaryInputLabel);
-        commentaryInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        commentaryInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Date:"));
         panel.add(dateInput);
         panel.add(dateInputLabel);
-        dateInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        dateInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Vehicle id: *"));
         panel.add(vehicleIdInput);
         panel.add(vehicleIdInputLabel);
-        vehicleIdInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        vehicleIdInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         panel.add(applyButton);
         applyButton.setEnabled(false);

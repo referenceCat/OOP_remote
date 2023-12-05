@@ -15,6 +15,7 @@ public class ReportDialog {
     public JTextField dateInput2;
     public JLabel dateInputLabel1;
     public JLabel dateInputLabel2;
+
     public ReportDialog(JFrame frame) {
         VerticalLayout layout = new VerticalLayout();
         panel = new JPanel(layout);
@@ -27,10 +28,19 @@ public class ReportDialog {
         panel.add(new JLabel("From:"));
         panel.add(dateInput1);
         panel.add(dateInputLabel1);
-        dateInput1.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        dateInput1.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         dateInput2 = new JTextField(40);
         dateInputLabel2 = new JLabel(" ");
@@ -39,10 +49,19 @@ public class ReportDialog {
         panel.add(new JLabel("From:"));
         panel.add(dateInput2);
         panel.add(dateInputLabel2);
-        dateInput2.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        dateInput2.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         applyButton = new JButton("Apply");
         panel.add(applyButton);
@@ -51,6 +70,7 @@ public class ReportDialog {
         dialog.setSize(455, 410);
         onTextUpdate();
     }
+
     private void onTextUpdate() {
         boolean valid = true;
         Utilities.ValidationResponse validationResponse;
@@ -75,7 +95,7 @@ public class ReportDialog {
 
         if (valid) {
             try {
-                if (Utilities.parseDate(dateInput1.getText()).after( Utilities.parseDate(dateInput2.getText()))) {
+                if (Utilities.parseDate(dateInput1.getText()).after(Utilities.parseDate(dateInput2.getText()))) {
                     valid = false;
                     dateInputLabel2.setText("Second date must be after first one ");
                 }
@@ -86,6 +106,7 @@ public class ReportDialog {
         }
         applyButton.setEnabled(valid);
     }
+
     public void show() {
         dialog.setVisible(true);
     }

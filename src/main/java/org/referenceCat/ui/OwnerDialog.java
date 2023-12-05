@@ -33,7 +33,7 @@ public class OwnerDialog {
 
         surnameInput = new JTextField(40);
         nameInput = new JTextField(40);
-        patronymicInput= new JTextField(40);
+        patronymicInput = new JTextField(40);
         birthDateInput = new JTextField(40);
         passportInput = new JTextField(40);
         licenseInput = new JTextField(40);
@@ -65,54 +65,108 @@ public class OwnerDialog {
         panel.add(new JLabel("Surname: *"));
         panel.add(surnameInput);
         panel.add(surnameInputLabel);
-        surnameInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        surnameInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
         panel.add(new JLabel("Name: *"));
         panel.add(nameInput);
         panel.add(nameInputLabel);
-        nameInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        nameInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Patronymic:"));
         panel.add(patronymicInput);
         panel.add(patronymicInputLabel);
-        patronymicInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        patronymicInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Birth date: *"));
         panel.add(birthDateInput);
         panel.add(birthDateInputLabel);
-        birthDateInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        birthDateInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("Passport number: *"));
         panel.add(passportInput);
         panel.add(passportInputLabel);
-        passportInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        passportInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(new JLabel("License number: *"));
         panel.add(licenseInput);
         panel.add(licenseInputLabel);
-        licenseInput.getDocument().addDocumentListener(new DocumentListener() {public void changedUpdate(DocumentEvent e) {
-            onTextUpdate();} public void removeUpdate(DocumentEvent e) {
-            onTextUpdate();} public void insertUpdate(DocumentEvent e) {
-            onTextUpdate();}});
+        licenseInput.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                onTextUpdate();
+            }
+        });
 
 
         panel.add(applyButton);
