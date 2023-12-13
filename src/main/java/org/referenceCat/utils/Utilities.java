@@ -23,10 +23,11 @@ public class Utilities {
     }
 
     public static ValidationResponse requiredFieldCheck(String s) {
-        if (s.isEmpty()) return new ValidationResponse("This is required field ");
+        if (s == null || s.isEmpty()) return new ValidationResponse("This is required field ");
         return new ValidationResponse();
     }
     public static boolean isNumeric(String s) {
+        if (s == null || s.isEmpty()) return false;
         for (Character c: s.toCharArray()) {
             if (!isDigit(c)) return false;
         }
@@ -57,12 +58,13 @@ public class Utilities {
             try {
                 parseDate(s);
                 return new ValidationResponse();
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 return new ValidationResponse("Wrong data format (must be dd.MM.yyyy) ");
             }
     }
 
     public static ValidationResponse regNumberValidation(String s) {
+        if(s == null) return new ValidationResponse("Wrong format ");
         if (s.length() != 8 && s.length() != 9) return new ValidationResponse("Wrong string length ");
         if (!(isCyrillicLetter(s.charAt(0))
                 && isDigit(s.charAt(1))
