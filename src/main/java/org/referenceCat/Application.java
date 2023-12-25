@@ -570,8 +570,7 @@ public class Application {
                 vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
                 if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
-
-                vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText(), Utilities.DATE_FORMAT));
+                if (!vehicleDialog.maintenanceDateInput.getText().isEmpty()) vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText(), Utilities.DATE_FORMAT));
 
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
                 if (owner == null) throw new PersistenceException("Owner not found");
@@ -592,6 +591,7 @@ public class Application {
     private void ownerAdditionDialog() {
         OwnerDialog ownerDialog = new OwnerDialog(frame);
         ownerDialog.applyButton.addActionListener(e -> {
+            EntityManager em = beginTransaction();
             try {
                 Owner owner = new Owner();
                 owner.setSurname(ownerDialog.surnameInput.getText());
@@ -602,13 +602,13 @@ public class Application {
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
 
-                EntityManager em = beginTransaction();
                 em.persist(owner);
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
                 defaultExceptionCatch(ex);
             } finally {
+                em.close();
                 updateTable();
             }
         });
