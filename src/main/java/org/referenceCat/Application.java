@@ -663,16 +663,21 @@ public class Application {
         int[] indexes;
         if (tabs.getSelectedIndex() == 0) {
             indexes = tableVehicles.getSelectedRows();
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION)) return;
+
             for (int index : indexes) {
+
                 deleteVehicle((Integer) tableVehicles.getValueAt(index, 0));
             }
         } else if (tabs.getSelectedIndex() == 1) {
             indexes = tableOwners.getSelectedRows();
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие ТС и нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION)) return;
             for (int index : indexes) {
                 deleteOwner((Integer) tableOwners.getValueAt(index, 0));
             }
         } else {
             indexes = tableViolations.getSelectedRows();
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи?", "", JOptionPane.YES_NO_OPTION)) return;
             for (int index : indexes) {
                 deleteViolation((Integer) tableViolations.getValueAt(index, 0));
             }
