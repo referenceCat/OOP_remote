@@ -24,6 +24,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
@@ -38,6 +41,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -80,7 +84,7 @@ public class Application {
 
 
     public void initGUI() {
-        frame = new JFrame("Traffic Police database");
+        frame = new JFrame("База данных ГИБДД");
         frame.setSize(1500, 900);
         frame.setLocation(100, 100);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,33 +101,33 @@ public class Application {
 
     private void initToolBar() {
         addButton = new JButton();
-        addButton.setToolTipText("Add");
+        addButton.setToolTipText("Добавить");
 
         deleteButton = new JButton();
-        deleteButton.setToolTipText("Delete");
+        deleteButton.setToolTipText("Удалить");
 
         editButton = new JButton();
-        editButton.setToolTipText("Edit");
+        editButton.setToolTipText("Редактировать");
 
         searchButton = new JButton();
-        searchButton.setToolTipText("Search");
+        searchButton.setToolTipText("Поиск");
 
         reloadButton = new JButton();
-        reloadButton.setToolTipText("Reload");
+        reloadButton.setToolTipText("Обновить таблицу");
 
         readXMLButton = new JButton();
-        readXMLButton.setToolTipText("Read XML");
+        readXMLButton.setToolTipText("Загрузить нарушения из xml");
 
         writeXMLButton = new JButton();
-        writeXMLButton.setToolTipText("Write XML");
+        writeXMLButton.setToolTipText("Сохранить выделеные нарушения в xml");
 
         pdfButton = new JButton();
-        pdfButton.setToolTipText("Make pdf");
+        pdfButton.setToolTipText("Отчет по нарушения за период");
 
         searchTextField = new JTextField();
         searchTextField.setPreferredSize(new Dimension(400, 42));
         searchTextField.setMaximumSize(searchTextField.getPreferredSize());
-        GhostText ghostText = new GhostText(searchTextField, "Search");
+        GhostText ghostText = new GhostText(searchTextField, "Поиск");
 
         toolBar = new JToolBar("Tool bar");
         toolBar.setPreferredSize(new Dimension(1000, 50));
@@ -140,6 +144,10 @@ public class Application {
         toolBar.add(searchButton);
         initButtonIcons();
         frame.add(toolBar, BorderLayout.NORTH);
+
+        deleteButton.setEnabled(false);
+        editButton.setEnabled(false);
+
         logger.info("Tool bar initialized");
     }
 
@@ -151,7 +159,7 @@ public class Application {
         JScrollPane scrollViolations = new JScrollPane();
         JScrollPane scrollOwners = new JScrollPane();
 
-        String[] columnsVehicles = {"id", "reg number", "model", "color", "maintenance date", "oid", "owner"};
+        String[] columnsVehicles = {"id", "Рег. номер ТС", "Модель", "Цвет", "Дата последнего ТО", "id в", "Владелец"};
         DefaultTableModel modelVehicles = new DefaultTableModel(columnsVehicles, 100) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -161,14 +169,16 @@ public class Application {
         tableVehicles = new JTable(modelVehicles);
         scrollVehicles = new JScrollPane(tableVehicles);
 
-        tableVehicles.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableVehicles.getColumnModel().getColumn(0).setMinWidth(30);
+        tableVehicles.getColumnModel().getColumn(0).setMaxWidth(50);
+        tableVehicles.getColumnModel().getColumn(0).setMinWidth(50);
+        tableVehicles.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
         tableVehicles.getColumnModel().getColumn(1).setMaxWidth(100);
         tableVehicles.getColumnModel().getColumn(1).setMinWidth(100);
-        tableVehicles.getColumnModel().getColumn(5).setMaxWidth(30);
-        tableVehicles.getColumnModel().getColumn(5).setMinWidth(30);
+        tableVehicles.getColumnModel().getColumn(5).setMaxWidth(50);
+        tableVehicles.getColumnModel().getColumn(5).setMinWidth(50);
+        tableVehicles.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
 
-        String[] columnsOwners = {"id", "surname", "name", "patronymic", "birth date", "passport", "license"};
+        String[] columnsOwners = {"id", "Фамилия", "Имя", "Отчество", "Дата рождения", "Номер паспорта", "Номер удостоверения"};
         modelOwners = new DefaultTableModel(columnsOwners, 10);
         tableOwners = new JTable(modelOwners) {
             public boolean isCellEditable(int row, int column) {
@@ -178,8 +188,9 @@ public class Application {
         };
         scrollOwners = new JScrollPane(tableOwners);
 
-        tableOwners.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableOwners.getColumnModel().getColumn(0).setMinWidth(30);
+        tableOwners.getColumnModel().getColumn(0).setMaxWidth(50);
+        tableOwners.getColumnModel().getColumn(0).setMinWidth(50);
+        tableOwners.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
         String[] columnsViolations = {"id", "Наказание", "Штраф", "Комментарий", "Дата", "id ТС", "Рег. номер ТС", "id н", "Нарушитель", "id с"};
         modelViolations = new DefaultTableModel(columnsViolations, 11);
@@ -205,9 +216,9 @@ public class Application {
         tableViolations.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
 
         tabs = new JTabbedPane();
-        tabs.add("Vehicles", scrollVehicles);
-        tabs.add("Owners", scrollOwners);
-        tabs.add("Violations", scrollViolations);
+        tabs.add("Транспортные средства", scrollVehicles);
+        tabs.add("Автовладельцы", scrollOwners);
+        tabs.add("Правонарушения", scrollViolations);
         tabs.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         frame.add(tabs);
 
@@ -281,7 +292,138 @@ public class Application {
             }
         });
 
+        tableViolations.addMouseListener(new MouseInputListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onTableSelection();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
+
+        tableOwners.addMouseListener(new MouseInputListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onTableSelection();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
+
+        tableVehicles.addMouseListener(new MouseInputListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onTableSelection();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
+
+        tabs.addChangeListener(e-> onTableSelection());
+
+
         logger.info("Listeners initialized");
+    }
+
+    private void onTableSelection() {
+        logger.debug("onTableSelection");
+        if (tabs.getSelectedIndex() == 0 && tableVehicles.getSelectedRow() == -1) {
+            deleteButton.setEnabled(false);
+            editButton.setEnabled(false);
+        } else if (tabs.getSelectedIndex() == 1 && tableOwners.getSelectedRow() == -1) {
+            deleteButton.setEnabled(false);
+            editButton.setEnabled(false);
+        } else if (tabs.getSelectedIndex() == 2 && tableViolations.getSelectedRow() == -1) {
+            deleteButton.setEnabled(false);
+            editButton.setEnabled(false);
+        } else {
+            deleteButton.setEnabled(true);
+            editButton.setEnabled(true);
+        }
     }
 
     private void makeReport() {
@@ -331,7 +473,7 @@ public class Application {
         tableVehicles.setRowHeight(16);
         tableOwners.setRowHeight(16);
         tableViolations.setRowHeight(16);
-        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Search")) return;
+        if (searchTextField.getText().isEmpty() || searchTextField.getText().equals("Поиск")) return;
         if (tabs.getSelectedIndex() == 0) {
 
             for (int i = 0; i < tableVehicles.getRowCount(); i++) {
