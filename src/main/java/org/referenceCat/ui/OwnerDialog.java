@@ -175,11 +175,6 @@ public class OwnerDialog {
         dialog.add(panel);
         dialog.setSize(455, 570);
         onTextUpdate();
-        JSpinner timeSpinner = new JSpinner( new SpinnerDateModel() );
-        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(timeSpinner, "dd.MM.yyyy HH:mm:ss");
-        timeSpinner.setEditor(timeEditor);
-        timeSpinner.setValue(new Date()); // will only show the current time
-        panel.add(timeSpinner);
 
     }
 
@@ -217,7 +212,7 @@ public class OwnerDialog {
         birthDateInputLabel.setText(validationResponse.message);
         valid &= validationResponse.isValid;
         if (validationResponse.isValid) {
-            validationResponse = Utilities.dateValidation(birthDateInput.getText());
+            validationResponse = Utilities.dateValidation(birthDateInput.getText(), Utilities.DATE_FORMAT);
             valid &= validationResponse.isValid;
             birthDateInputLabel.setText(validationResponse.message);
         }

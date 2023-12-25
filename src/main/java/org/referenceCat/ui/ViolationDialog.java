@@ -121,7 +121,7 @@ public class ViolationDialog {
         });
 
 
-        panel.add(new JLabel("Дата:"));
+        panel.add(new JLabel("Дата: *"));
         panel.add(dateInput);
         panel.add(dateInputLabel);
         dateInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -156,7 +156,7 @@ public class ViolationDialog {
             }
         });
 
-        panel.add(new JLabel("Id нарушителя:"));
+        panel.add(new JLabel("Id нарушителя: *"));
         panel.add(ownerIdInput);
         panel.add(ownerIdInputLabel);
         ownerIdInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -208,7 +208,7 @@ public class ViolationDialog {
         if ((penaltyInput.getSelectedIndex() == 0) && debtInput.getText().isEmpty()) {
             valid = false;
             debtInputLabel.setText("Необходимое поле ");
-        } else if (!Utilities.isInteger(debtInput.getText())) {
+        } else if ((penaltyInput.getSelectedIndex() == 0) && !Utilities.isInteger(debtInput.getText())) {
             valid = false;
             debtInputLabel.setText("Значение должно быть целым числом ");
         } else {
@@ -219,7 +219,7 @@ public class ViolationDialog {
         dateInputLabel.setText(validationResponse.message);
         valid &= validationResponse.isValid;
         if (validationResponse.isValid) {
-            validationResponse = Utilities.dateValidation(dateInput.getText());
+            validationResponse = Utilities.dateValidation(dateInput.getText(), Utilities.DATE_TIME_FORMAT);
             valid &= validationResponse.isValid;
             dateInputLabel.setText(validationResponse.message);
         }

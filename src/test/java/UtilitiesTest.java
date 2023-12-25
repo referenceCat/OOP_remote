@@ -58,21 +58,21 @@ public class UtilitiesTest {
 
     @Test
     public void testParseDate()  {
-        Assert.assertThrows(ParseException.class, () -> Utilities.parseDate("erhml"));
-        Assert.assertThrows(ParseException.class, () -> Utilities.parseDate(""));
-        Assert.assertThrows(NullPointerException.class, () -> Utilities.parseDate(null));
+        Assert.assertThrows(ParseException.class, () -> Utilities.parseDate("erhml", Utilities.DATE_FORMAT));
+        Assert.assertThrows(ParseException.class, () -> Utilities.parseDate("", Utilities.DATE_FORMAT));
+        Assert.assertThrows(NullPointerException.class, () -> Utilities.parseDate(null, Utilities.DATE_FORMAT));
         try {
-            Assert.assertEquals(Utilities.parseDate("17.11.2004"), new SimpleDateFormat("dd.MM.yyyy").parse("17.11.2004"));
+            Assert.assertEquals(Utilities.parseDate("17.11.2004", Utilities.DATE_FORMAT), new SimpleDateFormat("dd.MM.yyyy").parse("17.11.2004"));
         } catch (Exception ignored) {}
 
     }
 
     @Test
     public void testDateValidation() {
-        Assert.assertFalse(Utilities.dateValidation("").isValid);
-        Assert.assertFalse(Utilities.dateValidation(null).isValid);
-        Assert.assertFalse(Utilities.dateValidation("sfuvykbjk").isValid);
-        Assert.assertTrue(Utilities.dateValidation("17.11.2044").isValid);
+        Assert.assertFalse(Utilities.dateValidation("", Utilities.DATE_FORMAT).isValid);
+        Assert.assertFalse(Utilities.dateValidation(null, Utilities.DATE_FORMAT).isValid);
+        Assert.assertFalse(Utilities.dateValidation("sfuvykbjk", Utilities.DATE_FORMAT).isValid);
+        Assert.assertTrue(Utilities.dateValidation("17.11.2044", Utilities.DATE_FORMAT).isValid);
     }
 
     @Test

@@ -79,7 +79,7 @@ public class ReportDialog {
         dateInputLabel1.setText(validationResponse.message);
         valid &= validationResponse.isValid;
         if (validationResponse.isValid) {
-            validationResponse = Utilities.dateValidation(dateInput1.getText());
+            validationResponse = Utilities.dateValidation(dateInput1.getText(), Utilities.DATE_FORMAT);
             valid &= validationResponse.isValid;
             dateInputLabel1.setText(validationResponse.message);
         }
@@ -88,14 +88,14 @@ public class ReportDialog {
         dateInputLabel2.setText(validationResponse.message);
         valid &= validationResponse.isValid;
         if (validationResponse.isValid) {
-            validationResponse = Utilities.dateValidation(dateInput2.getText());
+            validationResponse = Utilities.dateValidation(dateInput2.getText(), Utilities.DATE_FORMAT);
             valid &= validationResponse.isValid;
             dateInputLabel2.setText(validationResponse.message);
         }
 
         if (valid) {
             try {
-                if (Utilities.parseDate(dateInput1.getText()).after(Utilities.parseDate(dateInput2.getText()))) {
+                if (Utilities.parseDate(dateInput1.getText(), Utilities.DATE_FORMAT).after(Utilities.parseDate(dateInput2.getText(), Utilities.DATE_FORMAT))) {
                     valid = false;
                     dateInputLabel2.setText("Second date must be after first one ");
                 }

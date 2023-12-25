@@ -25,8 +25,6 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
@@ -80,7 +78,6 @@ public class Application {
         em.getTransaction().begin();
         return em;
     }
-
 
 
     public void initGUI() {
@@ -153,7 +150,7 @@ public class Application {
 
     private void initTables() {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
         JScrollPane scrollVehicles = new JScrollPane();
         JScrollPane scrollViolations = new JScrollPane();
@@ -192,8 +189,8 @@ public class Application {
         tableOwners.getColumnModel().getColumn(0).setMinWidth(50);
         tableOwners.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 
-        String[] columnsViolations = {"id", "Наказание", "Штраф", "Комментарий", "Дата", "id ТС", "Рег. номер ТС", "id н", "Нарушитель", "id с"};
-        modelViolations = new DefaultTableModel(columnsViolations, 11);
+        String[] columnsViolations = {"id", "Тип", "Наказание", "Штраф", "Комментарий", "Дата", "id ТС", "Рег. номер ТС", "id н", "Нарушитель", "id с"};
+        modelViolations = new DefaultTableModel(columnsViolations, 12);
         tableViolations = new JTable(modelViolations) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -205,15 +202,15 @@ public class Application {
         tableViolations.getColumnModel().getColumn(0).setMaxWidth(50);
         tableViolations.getColumnModel().getColumn(0).setMinWidth(50);
         tableViolations.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
-        tableViolations.getColumnModel().getColumn(5).setMaxWidth(50);
-        tableViolations.getColumnModel().getColumn(5).setMinWidth(50);
-        tableViolations.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
-        tableViolations.getColumnModel().getColumn(7).setMaxWidth(50);
-        tableViolations.getColumnModel().getColumn(7).setMinWidth(50);
-        tableViolations.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
-        tableViolations.getColumnModel().getColumn(9).setMaxWidth(50);
-        tableViolations.getColumnModel().getColumn(9).setMinWidth(50);
-        tableViolations.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(6).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(6).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(8).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(8).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(8).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(10).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(10).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(10).setCellRenderer(centerRenderer);
 
         tabs = new JTabbedPane();
         tabs.add("Транспортные средства", scrollVehicles);
@@ -403,7 +400,7 @@ public class Application {
             }
         });
 
-        tabs.addChangeListener(e-> onTableSelection());
+        tabs.addChangeListener(e -> onTableSelection());
 
 
         logger.info("Listeners initialized");
@@ -526,7 +523,7 @@ public class Application {
         model.setRowCount(0);
         for (Vehicle vehicle : vehicles) {
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), Utilities.dateToString(vehicle.getMaintenanceDate()), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), Utilities.dateToString(vehicle.getMaintenanceDate(), Utilities.DATE_FORMAT), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
         }
 
         List<Owner> owners = em.createQuery("SELECT v FROM Owner v").getResultList();
@@ -534,7 +531,7 @@ public class Application {
         model = (DefaultTableModel) tableOwners.getModel();
         model.setRowCount(0);
         for (Owner owner : owners) {
-            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), Utilities.dateToString(owner.getBirthDate()), owner.getPassportId(), owner.getLicenseId()});
+            model.addRow(new Object[]{owner.getId(), owner.getSurname(), owner.getName(), owner.getPatronymic(), Utilities.dateToString(owner.getBirthDate(), Utilities.DATE_FORMAT), owner.getPassportId(), owner.getLicenseId()});
         }
 
         List<Violation> violations = em.createQuery("SELECT v FROM Violation v").getResultList();
@@ -545,7 +542,7 @@ public class Application {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = violation.getOwner();
             Officer officer = violation.getOfficer();
-            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic(), officer == null ? "" : officer.getId()});
+            model.addRow(new Object[]{violation.getId(), violation.getType(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate(), Utilities.DATE_TIME_FORMAT), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic(), officer == null ? "" : officer.getId()});
         }
 
         tableVehicles.setRowHeight(16);
@@ -574,7 +571,7 @@ public class Application {
                 if (!vehicleDialog.modelInput.getText().isEmpty()) vehicle.setModel(vehicleDialog.modelInput.getText());
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
 
-                vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
+                vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText(), Utilities.DATE_FORMAT));
 
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
                 if (owner == null) throw new PersistenceException("Owner not found");
@@ -601,7 +598,7 @@ public class Application {
                 owner.setName(ownerDialog.nameInput.getText());
                 if (!ownerDialog.patronymicInput.getText().isEmpty())
                     owner.setPatronymic(ownerDialog.patronymicInput.getText());
-                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText(), Utilities.DATE_FORMAT));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
 
@@ -629,7 +626,7 @@ public class Application {
                     violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
                 if (!violationDialog.commentaryInput.getText().isEmpty())
                     violation.setCommentary(violationDialog.commentaryInput.getText());
-                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
+                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText(), Utilities.DATE_TIME_FORMAT));
 
                 EntityManager em = beginTransaction();
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
@@ -689,7 +686,7 @@ public class Application {
                 if (!vehicleDialog.colorInput.getText().isEmpty()) vehicle.setColor(vehicleDialog.colorInput.getText());
                 vehicle.setMaintenanceDate(null);
                 if (!vehicleDialog.maintenanceDateInput.getText().isEmpty())
-                    vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
+                    vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText(), Utilities.DATE_FORMAT));
 
 
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
@@ -730,7 +727,7 @@ public class Application {
                 owner.setName(ownerDialog.nameInput.getText());
                 if (!ownerDialog.patronymicInput.getText().isEmpty())
                     owner.setPatronymic(ownerDialog.patronymicInput.getText());
-                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText()));
+                owner.setBirthDate(Utilities.parseDate(ownerDialog.birthDateInput.getText(), Utilities.DATE_FORMAT));
                 owner.setPassportId(ownerDialog.passportInput.getText());
                 owner.setLicenseId(ownerDialog.licenseInput.getText());
                 em.merge(owner);
@@ -755,14 +752,14 @@ public class Application {
 
         ViolationDialog violationDialog = new ViolationDialog(frame);
 
-        violationDialog.penaltyInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 1));
-        violationDialog.debtInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 2)).toString());
-        violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 3));
-        violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
-        violationDialog.vehicleIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 5)).toString());
-        violationDialog.typeInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 8));
-        violationDialog.officerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 6)).toString());
-        violationDialog.ownerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 7)).toString());
+        violationDialog.penaltyInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 2));
+        violationDialog.debtInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 3)).toString());
+        violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
+        violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 5));
+        violationDialog.vehicleIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 6)).toString());
+        violationDialog.typeInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 1));
+        violationDialog.officerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 7)).toString());
+        violationDialog.ownerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 8)).toString());
         violationDialog.applyButton.addActionListener(e -> {
             try {
                 EntityManager em = beginTransaction();
@@ -774,8 +771,8 @@ public class Application {
                     violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
                 if (!violationDialog.commentaryInput.getText().isEmpty())
                     violation.setCommentary(violationDialog.commentaryInput.getText());
-                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
-                
+                violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText(), Utilities.DATE_FORMAT));
+
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
                 if (vehicle == null) throw new PersistenceException("Vehicle not found");
                 violation.setVehicle(vehicle);
@@ -805,7 +802,8 @@ public class Application {
         int[] indexes;
         if (tabs.getSelectedIndex() == 0) {
             indexes = tableVehicles.getSelectedRows();
-            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION)) return;
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION))
+                return;
 
             for (int index : indexes) {
 
@@ -813,13 +811,15 @@ public class Application {
             }
         } else if (tabs.getSelectedIndex() == 1) {
             indexes = tableOwners.getSelectedRows();
-            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие ТС и нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION)) return;
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи? \n Соответсвующие ТС и нарушения также будут удалены!", "", JOptionPane.YES_NO_OPTION))
+                return;
             for (int index : indexes) {
                 deleteOwner((Integer) tableOwners.getValueAt(index, 0));
             }
         } else {
             indexes = tableViolations.getSelectedRows();
-            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи?", "", JOptionPane.YES_NO_OPTION)) return;
+            if (JOptionPane.YES_NO_OPTION != JOptionPane.showConfirmDialog(frame, "Удалить выделенные записи?", "", JOptionPane.YES_NO_OPTION))
+                return;
             for (int index : indexes) {
                 deleteViolation((Integer) tableViolations.getValueAt(index, 0));
             }
@@ -876,7 +876,7 @@ public class Application {
                 violation.setDebt(Integer.parseInt(findNode(subnodes, "debt").getTextContent()));
             if (findNode(subnodes, "commentary").getTextContent() != null)
                 violation.setCommentary(findNode(subnodes, "commentary").getTextContent());
-            violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent()));
+            violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent(), Utilities.DATE_FORMAT));
             Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(findNode(subnodes, "vehicle_id").getTextContent()));
             violation.setVehicle(vehicle);
             em.persist(violation);
@@ -941,7 +941,7 @@ public class Application {
 
             // violationItem.setAttribute("date", Utilities.dateToString(violation.getDate()));
             subitem = doc.createElement("date");
-            subitem.setTextContent(Utilities.dateToString(violation.getDate()));
+            subitem.setTextContent(Utilities.dateToString(violation.getDate(), Utilities.DATE_FORMAT));
             violationItem.appendChild(subitem);
         }
 
@@ -986,8 +986,8 @@ public class Application {
 
     private void onReportButton() {
         ReportDialog reportDialog = new ReportDialog(frame);
-        reportDialog.dateInput1.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
-        reportDialog.dateInput2.setText(Utilities.dateToString(Calendar.getInstance().getTime()));
+        reportDialog.dateInput1.setText(Utilities.dateToString(Calendar.getInstance().getTime(), Utilities.DATE_FORMAT));
+        reportDialog.dateInput2.setText(Utilities.dateToString(Calendar.getInstance().getTime(), Utilities.DATE_FORMAT));
         reportDialog.applyButton.addActionListener(e -> {
             try {
                 Object mutex = new Object();
@@ -997,13 +997,13 @@ public class Application {
                         logger.debug("thread 1 starts");
                         try {
                             sleep(100);
-                            Date from = Utilities.parseDate(reportDialog.dateInput1.getText());
-                            Date to = Utilities.parseDate(reportDialog.dateInput2.getText());
+                            Date from = Utilities.parseDate(reportDialog.dateInput1.getText(), Utilities.DATE_FORMAT);
+                            Date to = Utilities.parseDate(reportDialog.dateInput2.getText(), Utilities.DATE_FORMAT);
                             Date date;
 
                             ArrayList<Integer> ids = new ArrayList<>();
                             for (int i = 0; i < tableViolations.getRowCount(); i++) {
-                                date = Utilities.parseDate((String) tableViolations.getValueAt(i, 4));
+                                date = Utilities.parseDate((String) tableViolations.getValueAt(i, 5), Utilities.DATE_FORMAT);
                                 if (!date.before(from) && !date.after(to))
                                     ids.add((Integer) tableViolations.getValueAt(i, 0));
                             }
@@ -1058,7 +1058,8 @@ public class Application {
 
     private void defaultExceptionCatch(Throwable ex) {
         String description = throwableDescription(ex);
-        if (description == null || description.isEmpty()) JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+        if (description == null || description.isEmpty())
+            JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
         JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName() + "\n" + description, "Error", JOptionPane.ERROR_MESSAGE);
         logger.error("Exception ", ex);
     }

@@ -7,6 +7,9 @@ import java.util.Date;
 import static java.lang.Character.isDigit;
 
 public class Utilities {
+
+    public static final String DATE_FORMAT = "dd.MM.yyyy";
+    public static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
     public static class ValidationResponse {
         public boolean isValid;
         public String message;
@@ -45,21 +48,32 @@ public class Utilities {
         return new ValidationResponse();
     }
 
-    public static Date parseDate(String s) throws ParseException {
-        return new SimpleDateFormat("dd.MM.yyyy").parse(s);
+    public static boolean isDate(String s, String format_s) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(format_s);
+            format.setLenient(false);
+            format.parse(s);
+        } catch (ParseException | IllegalArgumentException e) {
+            return false;
+        }
+
+        return true;
     }
 
-    public static String dateToString(Date date) {
+    public static Date parseDate(String s, String format_s) throws ParseException {
+        return new SimpleDateFormat(format_s).parse(s);
+    }
+
+    public static String dateToString(Date date, String format_s) {
         if (date == null) return "";
-        return new SimpleDateFormat("dd.MM.yyyy").format(date);
+        return new SimpleDateFormat(format_s).format(date);
     }
 
-    public static ValidationResponse dateValidation(String s) {
-            try {
-                parseDate(s);
+    public static ValidationResponse dateValidation(String s, String format_s) {
+            if (isDate(s, format_s)) {
                 return new ValidationResponse();
-            } catch (Exception e) {
-                return new ValidationResponse("Неправильный формат даты (must be dd.MM.yyyy) ");
+            } else {
+                return new ValidationResponse("Неправильный формат даты (" + format_s + ") или даты не существует");
             }
     }
 

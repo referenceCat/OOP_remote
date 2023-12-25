@@ -166,7 +166,7 @@ public class VehicleDialog {
         }
 
         if (!maintenanceDateInput.getText().isEmpty()) {
-            validationResponse = Utilities.dateValidation(maintenanceDateInput.getText());
+            validationResponse = Utilities.dateValidation(maintenanceDateInput.getText(), Utilities.DATE_FORMAT);
             valid &= validationResponse.isValid;
             maintenanceDateInputLabel.setText(validationResponse.message);
         }
