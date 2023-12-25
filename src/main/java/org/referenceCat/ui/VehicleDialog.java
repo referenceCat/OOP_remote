@@ -56,7 +56,7 @@ public class VehicleDialog {
 
         applyButton = new JButton("Apply");
 
-        panel.add(new JLabel("Registration number: *"));
+        panel.add(new JLabel("Регистрационный номер: *"));
         panel.add(regNumberInput);
         panel.add(regNumberInputLabel);
         regNumberInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -73,7 +73,7 @@ public class VehicleDialog {
             }
         });
 
-        panel.add(new JLabel("Model:"));
+        panel.add(new JLabel("Модель ТС:"));
         panel.add(modelInput);
         panel.add(modelInputLabel);
         modelInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -91,7 +91,7 @@ public class VehicleDialog {
         });
 
 
-        panel.add(new JLabel("Color:"));
+        panel.add(new JLabel("Цвет:"));
         panel.add(colorInput);
         panel.add(colorInputLabel);
         colorInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -108,7 +108,7 @@ public class VehicleDialog {
             }
         });
 
-        panel.add(new JLabel("Maintenance date:"));
+        panel.add(new JLabel("Дата последнего ТО:"));
         panel.add(maintenanceDateInput);
         panel.add(maintenanceDateInputLabel);
         maintenanceDateInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -126,7 +126,7 @@ public class VehicleDialog {
         });
 
 
-        panel.add(new JLabel("Owner's id: *"));
+        panel.add(new JLabel("id владельца: *"));
         panel.add(ownerIdInput);
         panel.add(ownerIdInputLabel);
         ownerIdInput.getDocument().addDocumentListener(new DocumentListener() {

@@ -25,7 +25,7 @@ public class ReportDialog {
         dateInputLabel1 = new JLabel(" ");
         dateInputLabel1.setForeground(Color.RED);
         dateInputLabel1.setFont(new Font("Times New Roman", Font.ITALIC, 12));
-        panel.add(new JLabel("From:"));
+        panel.add(new JLabel("От:"));
         panel.add(dateInput1);
         panel.add(dateInputLabel1);
         dateInput1.getDocument().addDocumentListener(new DocumentListener() {
@@ -46,7 +46,7 @@ public class ReportDialog {
         dateInputLabel2 = new JLabel(" ");
         dateInputLabel2.setForeground(Color.RED);
         dateInputLabel2.setFont(new Font("Times New Roman", Font.ITALIC, 12));
-        panel.add(new JLabel("From:"));
+        panel.add(new JLabel("До:"));
         panel.add(dateInput2);
         panel.add(dateInputLabel2);
         dateInput2.getDocument().addDocumentListener(new DocumentListener() {
@@ -67,7 +67,7 @@ public class ReportDialog {
         panel.add(applyButton);
         applyButton.setEnabled(false);
         dialog.add(panel);
-        dialog.setSize(455, 410);
+        dialog.setSize(455, 210);
         onTextUpdate();
     }
 
@@ -97,7 +97,7 @@ public class ReportDialog {
             try {
                 if (Utilities.parseDate(dateInput1.getText(), Utilities.DATE_FORMAT).after(Utilities.parseDate(dateInput2.getText(), Utilities.DATE_FORMAT))) {
                     valid = false;
-                    dateInputLabel2.setText("Second date must be after first one ");
+                    dateInputLabel2.setText("Вторая дата должна быть после первой ");
                 }
             } catch (Exception e) {
                 valid = false;

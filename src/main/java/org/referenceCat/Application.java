@@ -4,12 +4,14 @@
  */
 package org.referenceCat;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.fop.apps.*;
 import org.apache.log4j.Logger;
 import org.referenceCat.entities.Officer;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
+import org.referenceCat.exceptions.ValidationException;
 import org.referenceCat.ui.*;
 import org.referenceCat.utils.Utilities;
 import org.w3c.dom.Document;
@@ -40,10 +42,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -523,7 +522,7 @@ public class Application {
         model.setRowCount(0);
         for (Vehicle vehicle : vehicles) {
             Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), Utilities.dateToString(vehicle.getMaintenanceDate(), Utilities.DATE_FORMAT), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            model.addRow(new Object[]{vehicle.getId(), vehicle.getRegNumber(), vehicle.getModel(), vehicle.getColor(), Utilities.dateToString(vehicle.getMaintenanceDate(), Utilities.DATE_FORMAT), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + (owner.getPatronymic() != null ? owner.getPatronymic() : "")});
         }
 
         List<Owner> owners = em.createQuery("SELECT v FROM Owner v").getResultList();
@@ -542,7 +541,7 @@ public class Application {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = violation.getOwner();
             Officer officer = violation.getOfficer();
-            model.addRow(new Object[]{violation.getId(), violation.getType(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate(), Utilities.DATE_TIME_FORMAT), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic(), officer == null ? "" : officer.getId()});
+            model.addRow(new Object[]{violation.getId(), violation.getType(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate(), Utilities.DATE_TIME_FORMAT), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + (owner.getPatronymic() != null ? owner.getPatronymic() : ""), officer == null ? "" : officer.getId()});
         }
 
         tableVehicles.setRowHeight(16);
@@ -859,111 +858,148 @@ public class Application {
         return null;
     }
 
-    private void readXML(String path) throws ParserConfigurationException, IOException, SAXException, ParseException {
-        DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = dBuilder.parse(new File(path));
-        doc.getDocumentElement().normalize();
+    private void readXML(String path) throws ValidationException {
+        try {
+            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = dBuilder.parse(new File(path));
+            doc.getDocumentElement().normalize();
 
-        EntityManager em = beginTransaction();
+            EntityManager em = beginTransaction();
 
-        NodeList nlViolations = doc.getElementsByTagName("violation");
-        for (int i = 0; i < nlViolations.getLength(); i++) {
-            Node elem = nlViolations.item(i);
-            NodeList subnodes = elem.getChildNodes();
-            Violation violation = new Violation();
-            violation.setPenalty(findNode(subnodes, "penalty").getTextContent());
-            if (violation.getPenalty().equals("Debt"))
-                violation.setDebt(Integer.parseInt(findNode(subnodes, "debt").getTextContent()));
-            if (findNode(subnodes, "commentary").getTextContent() != null)
-                violation.setCommentary(findNode(subnodes, "commentary").getTextContent());
-            violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent(), Utilities.DATE_FORMAT));
-            Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(findNode(subnodes, "vehicle_id").getTextContent()));
-            violation.setVehicle(vehicle);
-            em.persist(violation);
+            NodeList nlViolations = doc.getElementsByTagName("violation");
+            for (int i = 0; i < nlViolations.getLength(); i++) {
+                Node elem = nlViolations.item(i);
+                NodeList subnodes = elem.getChildNodes();
+                Violation violation = new Violation();
+                violation.setType(findNode(subnodes, "type").getTextContent());
+                violation.setPenalty(findNode(subnodes, "penalty").getTextContent());
+                if (violation.getPenalty().equals("Штраф"))
+                    violation.setDebt(Integer.parseInt(findNode(subnodes, "debt").getTextContent()));
+                if (findNode(subnodes, "commentary") != null)
+                    violation.setCommentary(findNode(subnodes, "commentary").getTextContent());
+                violation.setDate(Utilities.parseDate(findNode(subnodes, "date").getTextContent(), Utilities.DATE_FORMAT));
+                Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(findNode(subnodes, "vehicle_id").getTextContent()));
+                violation.setVehicle(vehicle);
+
+                Owner owner = em.find(Owner.class, Integer.parseInt(findNode(subnodes, "owner_id").getTextContent()));
+                violation.setOwner(owner);
+
+                Node officerIdnode = findNode(subnodes, "officer_id");
+
+                if (officerIdnode != null) {
+                    Officer officer = em.find(Officer.class, Integer.parseInt(officerIdnode.getTextContent()));
+                    if (officer != null) violation.setOfficer(officer);
+                }
+
+                em.persist(violation);
+            }
+            commitTransaction(em);
+            updateTable();
+        } catch (Exception ex) {
+            throw new ValidationException("readXML exception");
         }
-        commitTransaction(em);
-        updateTable();
     }
 
-    private void writeXML(String pathToResult) throws ParserConfigurationException, TransformerException, IOException {
+    private void writeXML(String pathToResult) throws ValidationException {
         int[] ids;
         ids = tableViolations.getSelectedRows();
         if (ids.length == 0) {
             ids = new int[tableViolations.getRowCount()];
-            for (int i = 0; i < tableViolations.getRowCount(); i++) ;
+            for (int i = 0; i < tableViolations.getRowCount(); i++) ids[i] = (int) tableViolations.getValueAt(i, 0);;
         }
         for (int i = 0; i < ids.length; i++) {
-            ids[i] = (int) tableViolations.getValueAt(i, 0);
+            ids[i] = (int) tableViolations.getValueAt(ids[i], 0);
         }
 
         writeXMLbyId(pathToResult, ids);
     }
 
-    private void writeXMLbyId(String pathToResult, int[] ids) throws ParserConfigurationException, IOException, TransformerException {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = builder.newDocument();
-        Node violations = doc.createElement("violations");
-        doc.appendChild(violations);
+    private void writeXMLbyId(String pathToResult, int[] ids) throws ValidationException {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = builder.newDocument();
+            Node violations = doc.createElement("violations");
+            doc.appendChild(violations);
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
-        EntityManager em = emf.createEntityManager();
-        for (int id : ids) {
-            Violation violation = em.find(Violation.class, id);
-            Element violationItem = doc.createElement("violation");
-            Element subitem;
-            violations.appendChild(violationItem);
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            for (int id : ids) {
+                Violation violation = em.find(Violation.class, id);
+                Element violationItem = doc.createElement("violation");
+                Element subitem;
+                violations.appendChild(violationItem);
 
-            subitem = doc.createElement("id");
-            subitem.setTextContent(Integer.toString(violation.getId()));
-            violationItem.appendChild(subitem);
-
-            subitem = doc.createElement("penalty");
-            subitem.setTextContent(violation.getPenalty());
-            violationItem.appendChild(subitem);
-
-            if (violation.getPenalty().equals("Debt")) {
-                subitem = doc.createElement("debt");
-                subitem.setTextContent(Integer.toString(violation.getDebt()));
+                subitem = doc.createElement("id");
+                subitem.setTextContent(Integer.toString(violation.getId()));
                 violationItem.appendChild(subitem);
+
+                subitem = doc.createElement("type");
+                subitem.setTextContent(violation.getType());
+                violationItem.appendChild(subitem);
+
+                subitem = doc.createElement("penalty");
+                subitem.setTextContent(violation.getPenalty());
+                violationItem.appendChild(subitem);
+
+                if (violation.getPenalty().equals("Штраф")) {
+                    subitem = doc.createElement("debt");
+                    subitem.setTextContent(Integer.toString(violation.getDebt()));
+                    violationItem.appendChild(subitem);
+                }
+
+                if (violation.getCommentary() != null) {
+                    // violationItem.setAttribute("commentary", violation.getCommentary());
+                    subitem = doc.createElement("commentary");
+                    subitem.setTextContent(violation.getCommentary());
+                    violationItem.appendChild(subitem);
+                }
+
+                // violationItem.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
+                subitem = doc.createElement("vehicle_id");
+                subitem.setTextContent(Integer.toString(violation.getVehicle().getId()));
+                violationItem.appendChild(subitem);
+
+                subitem = doc.createElement("owner_id");
+                subitem.setTextContent(Integer.toString(violation.getOwner().getId()));
+                violationItem.appendChild(subitem);
+
+                // violationItem.setAttribute("date", Utilities.dateToString(violation.getDate()));
+                subitem = doc.createElement("date");
+                subitem.setTextContent(Utilities.dateToString(violation.getDate(), Utilities.DATE_FORMAT));
+                violationItem.appendChild(subitem);
+
+                if (violation.getOfficer() != null) {
+                    subitem = doc.createElement("officer_id");
+                    subitem.setTextContent(Integer.toString(violation.getOfficer().getId()));
+                    violationItem.appendChild(subitem);
+                }
             }
 
-            if (violation.getCommentary() != null) {
-                // violationItem.setAttribute("commentary", violation.getCommentary());
-                subitem = doc.createElement("commentary");
-                subitem.setTextContent(violation.getCommentary());
-                violationItem.appendChild(subitem);
-            }
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            FileWriter fw = new FileWriter(pathToResult);
+            trans.transform(new DOMSource(doc), new StreamResult(fw));
 
-            // violationItem.setAttribute("vehicle_id", Integer.toString(violation.getVehicle().getId()));
-            subitem = doc.createElement("vehicle_id");
-            subitem.setTextContent(Integer.toString(violation.getVehicle().getId()));
-            violationItem.appendChild(subitem);
-
-            // violationItem.setAttribute("date", Utilities.dateToString(violation.getDate()));
-            subitem = doc.createElement("date");
-            subitem.setTextContent(Utilities.dateToString(violation.getDate(), Utilities.DATE_FORMAT));
-            violationItem.appendChild(subitem);
+        } catch (Exception ex) {
+            throw new ValidationException("writeXML exception");
         }
-
-        Transformer trans = TransformerFactory.newInstance().newTransformer();
-        FileWriter fw = new FileWriter(pathToResult);
-        trans.transform(new DOMSource(doc), new StreamResult(fw));
     }
 
-    public void convertToPDF(String pathToSourceXML, String pathToResult) throws IOException, FOPException, TransformerException {
-        // the XSL FO file
-        File xsltFile = new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/src/main/resources/template.xsl");
-        // the XML file which provides the input
-        StreamSource xmlSource = new StreamSource(new File(pathToSourceXML));
-        // create an instance of fop factory
-        FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
-        // a user agent is needed for transformation
-        FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
-        // Setup output
-        OutputStream out;
-        out = new java.io.FileOutputStream(pathToResult);
-
+    public void convertToPDF(String pathToSourceXML, String pathToResult) throws ValidationException, IOException {
+        OutputStream out = null;
         try {
+            // the XSL FO file
+            File xsltFile = new File("/home/referencecat/IdeaProjects/TrafficPoliceApplication/src/main/resources/template.xsl");
+            // the XML file which provides the input
+            StreamSource xmlSource = new StreamSource(new File(pathToSourceXML));
+            // create an instance of fop factory
+            FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+            // a user agent is needed for transformation
+            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            // Setup output
+
+            out = new java.io.FileOutputStream(pathToResult);
+
+
             // Construct fop with desired output format
             Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
 
@@ -979,6 +1015,8 @@ public class Application {
             // That's where the XML is first transformed to XSL-FO and then
             // PDF is created
             transformer.transform(xmlSource, res);
+        } catch (Exception ex) {
+            throw  new ValidationException("pdf exception");
         } finally {
             out.close();
         }
@@ -1053,7 +1091,28 @@ public class Application {
     }
 
     private String throwableDescription(Throwable ex) {
-        return "PLACEHOLDER";
+        if (ex.getClass() == PersistenceException.class) {
+            if (ex.getMessage().contains("Violation not found")) return "Правонарушение не найдено";
+            if (ex.getMessage().contains("Vehicle not found")) return "ТС не найдено";
+            if (ex.getMessage().contains("Owner not found")) return "Автовладелец не найден";
+            if (ex.getMessage().contains("Officer not found")) return "Сотрудник не найден";
+            if (ex.getMessage().contains("could not execute statement")) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                ex.printStackTrace(pw);
+                if (sw.toString().contains("for key 'persons.passport_id_UNIQUE'")) return "Номер паспорта не уникален";
+                if (sw.toString().contains("for key 'persons.license_id_UNIQUE'")) return "Номер лицензии не уникален";
+                if (sw.toString().contains("for key 'vehicles.reg_number_UNIQUE'")) return "Регистрационный номер ТС не уникален";
+            }
+        }
+        if (ex.getClass() == ParseException.class) return "Неверный формат данных";
+        if (ex.getClass() == ValidationException.class) {
+            if (ex.getMessage().contains("readXML")) return "Некоректные данные xml файла или он не найден";
+            if (ex.getMessage().contains("writeXML")) return "Не возмжна запись xml файла или он не найден";
+            if (ex.getMessage().contains("pdf")) return "Ошибка при составлении отчета";
+            return "Ошибка валидации";
+        }
+        return ex.getMessage();
     }
 
     private void defaultExceptionCatch(Throwable ex) {
@@ -1063,6 +1122,5 @@ public class Application {
         JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName() + "\n" + description, "Error", JOptionPane.ERROR_MESSAGE);
         logger.error("Exception ", ex);
     }
-
 }
 

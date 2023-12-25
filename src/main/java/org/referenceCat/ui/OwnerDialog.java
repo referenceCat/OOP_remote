@@ -62,7 +62,7 @@ public class OwnerDialog {
 
         applyButton = new JButton("Apply");
 
-        panel.add(new JLabel("Surname: *"));
+        panel.add(new JLabel("Фамилия: *"));
         panel.add(surnameInput);
         panel.add(surnameInputLabel);
         surnameInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -79,7 +79,7 @@ public class OwnerDialog {
             }
         });
 
-        panel.add(new JLabel("Name: *"));
+        panel.add(new JLabel("Имя: *"));
         panel.add(nameInput);
         panel.add(nameInputLabel);
         nameInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -97,7 +97,7 @@ public class OwnerDialog {
         });
 
 
-        panel.add(new JLabel("Patronymic:"));
+        panel.add(new JLabel("Отчество:"));
         panel.add(patronymicInput);
         panel.add(patronymicInputLabel);
         patronymicInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -115,7 +115,7 @@ public class OwnerDialog {
         });
 
 
-        panel.add(new JLabel("Birth date: *"));
+        panel.add(new JLabel("Дата рождения: *"));
         panel.add(birthDateInput);
         panel.add(birthDateInputLabel);
         birthDateInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -133,7 +133,7 @@ public class OwnerDialog {
         });
 
 
-        panel.add(new JLabel("Passport number: *"));
+        panel.add(new JLabel("Номер паспорта: *"));
         panel.add(passportInput);
         panel.add(passportInputLabel);
         passportInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -151,7 +151,7 @@ public class OwnerDialog {
         });
 
 
-        panel.add(new JLabel("License number: *"));
+        panel.add(new JLabel("Номер удостоверения: *"));
         panel.add(licenseInput);
         panel.add(licenseInputLabel);
         licenseInput.getDocument().addDocumentListener(new DocumentListener() {
@@ -173,7 +173,7 @@ public class OwnerDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 570);
+        dialog.setSize(455, 460);
         onTextUpdate();
 
     }
