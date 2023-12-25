@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.Date;
 
 public class OwnerDialog {
     public JDialog dialog;
@@ -24,7 +25,6 @@ public class OwnerDialog {
     public JLabel birthDateInputLabel;
     public JLabel passportInputLabel;
     public JLabel licenseInputLabel;
-
 
     public OwnerDialog(JFrame frame) {
         VerticalLayout layout = new VerticalLayout();
@@ -173,8 +173,14 @@ public class OwnerDialog {
         applyButton.setEnabled(false);
 
         dialog.add(panel);
-        dialog.setSize(455, 460);
+        dialog.setSize(455, 570);
         onTextUpdate();
+        JSpinner timeSpinner = new JSpinner( new SpinnerDateModel() );
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(timeSpinner, "dd.MM.yyyy HH:mm:ss");
+        timeSpinner.setEditor(timeEditor);
+        timeSpinner.setValue(new Date()); // will only show the current time
+        panel.add(timeSpinner);
+
     }
 
     private void onTextUpdate() {

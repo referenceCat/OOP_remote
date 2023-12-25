@@ -18,6 +18,10 @@ public class Violation {
     private Date date;
     private Officer officer;
 
+    private Owner owner;
+
+    private String type;
+
     public Violation() {
     }
 
@@ -86,5 +90,24 @@ public class Violation {
 
     public void setOfficer(Officer officer) {
         this.officer = officer;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
+    }
+
+    @Column(name = "type")
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

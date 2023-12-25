@@ -6,6 +6,7 @@ package org.referenceCat;
 
 import org.apache.fop.apps.*;
 import org.apache.log4j.Logger;
+import org.referenceCat.entities.Officer;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
@@ -23,6 +24,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,12 +77,7 @@ public class Application {
         return em;
     }
 
-    private static Date addDays(Date date, int days) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, days); //minus number would decrement the days
-        return cal.getTime();
-    }
+
 
     public void initGUI() {
         frame = new JFrame("Traffic Police database");
@@ -147,6 +144,9 @@ public class Application {
     }
 
     private void initTables() {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+
         JScrollPane scrollVehicles = new JScrollPane();
         JScrollPane scrollViolations = new JScrollPane();
         JScrollPane scrollOwners = new JScrollPane();
@@ -181,8 +181,8 @@ public class Application {
         tableOwners.getColumnModel().getColumn(0).setMaxWidth(30);
         tableOwners.getColumnModel().getColumn(0).setMinWidth(30);
 
-        String[] columnsViolations = {"id", "penalty", "debt", "commentary", "date", "cid", "reg number", "oid", "owner"};
-        modelViolations = new DefaultTableModel(columnsViolations, 10);
+        String[] columnsViolations = {"id", "Наказание", "Штраф", "Комментарий", "Дата", "id ТС", "Рег. номер ТС", "id н", "Нарушитель", "id с"};
+        modelViolations = new DefaultTableModel(columnsViolations, 11);
         tableViolations = new JTable(modelViolations) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -191,12 +191,18 @@ public class Application {
         };
         scrollViolations = new JScrollPane(tableViolations);
 
-        tableViolations.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableViolations.getColumnModel().getColumn(0).setMinWidth(30);
-        tableViolations.getColumnModel().getColumn(5).setMaxWidth(30);
-        tableViolations.getColumnModel().getColumn(5).setMinWidth(30);
-        tableViolations.getColumnModel().getColumn(7).setMaxWidth(30);
-        tableViolations.getColumnModel().getColumn(7).setMinWidth(30);
+        tableViolations.getColumnModel().getColumn(0).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(0).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(5).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(5).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(7).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(7).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+        tableViolations.getColumnModel().getColumn(9).setMaxWidth(50);
+        tableViolations.getColumnModel().getColumn(9).setMinWidth(50);
+        tableViolations.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
 
         tabs = new JTabbedPane();
         tabs.add("Vehicles", scrollVehicles);
@@ -217,27 +223,24 @@ public class Application {
         searchButton.addActionListener(event -> {
             try {
                 search();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", e);
+            } catch (Exception ex) {
+                defaultExceptionCatch(ex);
             }
         });
 
         readXMLButton.addActionListener(event -> {
             try {
                 readXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/input.xml");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", e);
+            } catch (Exception ex) {
+                defaultExceptionCatch(ex);
             }
         });
 
         writeXMLButton.addActionListener(event -> {
             try {
                 writeXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/output.xml");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", e);
+            } catch (Exception ex) {
+                defaultExceptionCatch(ex);
             }
         });
 
@@ -274,8 +277,7 @@ public class Application {
             try {
                 onReportButton();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             }
         });
 
@@ -287,9 +289,8 @@ public class Application {
             writeXML("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml");
             convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
                     "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-            logger.error("Exception ", e);
+        } catch (Exception ex) {
+            defaultExceptionCatch(ex);
         }
 
     }
@@ -357,7 +358,7 @@ public class Application {
                 }
             }
         } else {
-            for (int i = 0; i < tableViolations.getRowCount(); i++) {
+            for (int i = 0; i < tableViolations.getRowCount(); i++) { // todo (> _ <)
                 if (!Integer.toString((Integer) tableViolations.getValueAt(i, 0)).contains(searchTextField.getText()) &&
                         !((String) tableViolations.getValueAt(i, 1)).contains(searchTextField.getText()) &&
                         !Integer.toString((Integer) tableViolations.getValueAt(i, 2)).contains(searchTextField.getText()) &&
@@ -400,8 +401,9 @@ public class Application {
         model.setRowCount(0);
         for (Violation violation : violations) {
             Vehicle vehicle = violation.getVehicle();
-            Owner owner = vehicle.getOwner();
-            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic()});
+            Owner owner = violation.getOwner();
+            Officer officer = violation.getOfficer();
+            model.addRow(new Object[]{violation.getId(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate()), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + owner.getPatronymic(), officer == null ? "" : officer.getId()});
         }
 
         tableVehicles.setRowHeight(16);
@@ -423,6 +425,7 @@ public class Application {
     private void vehicleAdditionDialog() {
         VehicleDialog vehicleDialog = new VehicleDialog(frame);
         vehicleDialog.applyButton.addActionListener(e -> {
+            EntityManager em = beginTransaction();
             try {
                 Vehicle vehicle = new Vehicle();
                 vehicle.setRegNumber(vehicleDialog.regNumberInput.getText());
@@ -431,7 +434,6 @@ public class Application {
 
                 vehicle.setMaintenanceDate(Utilities.parseDate(vehicleDialog.maintenanceDateInput.getText()));
 
-                EntityManager em = beginTransaction();
                 Owner owner = em.find(Owner.class, Integer.parseInt(vehicleDialog.ownerIdInput.getText()));
                 if (owner == null) throw new PersistenceException("Owner not found");
                 vehicle.setOwner(owner);
@@ -439,9 +441,9 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception", ex);
+                defaultExceptionCatch(ex);
             } finally {
+                em.close();
                 updateTable();
             }
         });
@@ -466,8 +468,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
@@ -480,6 +481,7 @@ public class Application {
         violationDialog.applyButton.addActionListener(e -> {
             try {
                 Violation violation = new Violation();
+                violation.setType((String) violationDialog.typeInput.getSelectedItem());
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
                 if (violationDialog.penaltyInput.getSelectedIndex() == 0)
                     violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
@@ -491,12 +493,22 @@ public class Application {
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
                 if (vehicle == null) throw new PersistenceException("Vehicle not found");
                 violation.setVehicle(vehicle);
+
+                Owner owner = em.find(Owner.class, Integer.parseInt(violationDialog.ownerIdInput.getText()));
+                if (owner == null) throw new PersistenceException("Owner not found");
+                violation.setOwner(owner);
+
+                if (!violationDialog.officerIdInput.getText().isEmpty()) {
+                    Officer officer = em.find(Officer.class, Integer.parseInt(violationDialog.officerIdInput.getText()));
+                    if (officer == null) throw new PersistenceException("Officer not found");
+                    violation.setOfficer(officer);
+                } else violation.setOfficer(null);
+
                 em.persist(violation);
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
@@ -545,8 +557,7 @@ public class Application {
                 commitTransaction(em);
                 vehicleDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
@@ -584,8 +595,7 @@ public class Application {
                 commitTransaction(em);
                 ownerDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
@@ -608,27 +618,40 @@ public class Application {
         violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 3));
         violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
         violationDialog.vehicleIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 5)).toString());
+        violationDialog.typeInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 8));
+        violationDialog.officerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 6)).toString());
+        violationDialog.ownerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 7)).toString());
         violationDialog.applyButton.addActionListener(e -> {
             try {
                 EntityManager em = beginTransaction();
                 Violation violation = em.find(Violation.class, tableViolations.getValueAt(selectedRow, 0));
-                if (violation == null) throw new PersistenceException("Owner not found");
+                if (violation == null) throw new PersistenceException("Violation not found");
+                violation.setType((String) violationDialog.typeInput.getSelectedItem());
                 violation.setPenalty((String) violationDialog.penaltyInput.getSelectedItem());
                 if (violationDialog.penaltyInput.getSelectedIndex() == 0)
                     violation.setDebt(Integer.parseInt(violationDialog.debtInput.getText()));
                 if (!violationDialog.commentaryInput.getText().isEmpty())
                     violation.setCommentary(violationDialog.commentaryInput.getText());
                 violation.setDate(Utilities.parseDate(violationDialog.dateInput.getText()));
-
+                
                 Vehicle vehicle = em.find(Vehicle.class, Integer.parseInt(violationDialog.vehicleIdInput.getText()));
-                if (vehicle == null) throw new PersistenceException("Owner not found");
+                if (vehicle == null) throw new PersistenceException("Vehicle not found");
                 violation.setVehicle(vehicle);
+
+                Owner owner = em.find(Owner.class, Integer.parseInt(violationDialog.ownerIdInput.getText()));
+                if (owner == null) throw new PersistenceException("Owner not found");
+                violation.setOwner(owner);
+
+                if (!violationDialog.officerIdInput.getText().isEmpty()) {
+                    Officer officer = em.find(Officer.class, Integer.parseInt(violationDialog.officerIdInput.getText()));
+                    if (officer == null) throw new PersistenceException("Officer not found");
+                    violation.setOfficer(officer);
+                } else violation.setOfficer(null);
                 em.persist(violation);
                 commitTransaction(em);
                 violationDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
@@ -841,8 +864,7 @@ public class Application {
                             writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
                             mutex.notifyAll();
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Something went wrong " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                            logger.error("Exception ", ex);
+                            defaultExceptionCatch(ex);
                         }
                         System.out.println("thread 1 ends");
                         logger.debug("thread 1 ends");
@@ -862,8 +884,7 @@ public class Application {
                             convertToPDF("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml",
                                     "/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report.pdf");
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                            logger.error("Exception ", ex);
+                            defaultExceptionCatch(ex);
                         }
                         System.out.println("thread 2 ends");
                         logger.debug("thread 2 ends");
@@ -876,13 +897,23 @@ public class Application {
 
                 reportDialog.dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Something went wrong: " + e.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-                logger.error("Exception ", ex);
+                defaultExceptionCatch(ex);
             } finally {
                 updateTable();
             }
         });
         reportDialog.show();
+    }
+
+    private String throwableDescription(Throwable ex) {
+        return "PLACEHOLDER";
+    }
+
+    private void defaultExceptionCatch(Throwable ex) {
+        String description = throwableDescription(ex);
+        if (description == null || description.isEmpty()) JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName() + "\n" + description, "Error", JOptionPane.ERROR_MESSAGE);
+        logger.error("Exception ", ex);
     }
 
 }

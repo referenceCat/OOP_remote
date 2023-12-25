@@ -23,7 +23,7 @@ public class Utilities {
     }
 
     public static ValidationResponse requiredFieldCheck(String s) {
-        if (s == null || s.isEmpty()) return new ValidationResponse("This is required field ");
+        if (s == null || s.isEmpty()) return new ValidationResponse("Необходимое поле ");
         return new ValidationResponse();
     }
     public static boolean isNumeric(String s) {
@@ -34,14 +34,14 @@ public class Utilities {
         return true;
     }
     public static ValidationResponse passportValidation(String s) {
-        if (!isNumeric(s)) return new ValidationResponse("Passport number must be numeric");
-        if (s.length() != 10) return new ValidationResponse("Invalid length (must be 10)");
+        if (!isNumeric(s)) return new ValidationResponse("Номер паспотра должен быть целым числом ");
+        if (s.length() != 10) return new ValidationResponse("Неправильная длина строки (необходимо 10) ");
         return new ValidationResponse();
     }
 
     public static ValidationResponse licenseValidation(String s) {
-        if (!isNumeric(s)) return new ValidationResponse("License number must be numeric");
-        if (s.length() != 10) return new ValidationResponse("Invalid length (must be 10)");
+        if (!isNumeric(s)) return new ValidationResponse("Номер лицензии должен быть целым числом ");
+        if (s.length() != 10) return new ValidationResponse("Неправильная длина строки (необходимо 10)");
         return new ValidationResponse();
     }
 
@@ -59,13 +59,13 @@ public class Utilities {
                 parseDate(s);
                 return new ValidationResponse();
             } catch (Exception e) {
-                return new ValidationResponse("Wrong data format (must be dd.MM.yyyy) ");
+                return new ValidationResponse("Неправильный формат даты (must be dd.MM.yyyy) ");
             }
     }
 
     public static ValidationResponse regNumberValidation(String s) {
         if(s == null) return new ValidationResponse("Wrong format ");
-        if (s.length() != 8 && s.length() != 9) return new ValidationResponse("Wrong string length ");
+        if (s.length() != 8 && s.length() != 9) return new ValidationResponse("Неправильная длина строки");
         if (!(isCyrillicLetter(s.charAt(0))
                 && isDigit(s.charAt(1))
                 && isDigit(s.charAt(2))
@@ -74,7 +74,7 @@ public class Utilities {
         && isCyrillicLetter(s.charAt(5))
                 && isDigit(s.charAt(6))
                 && isDigit(s.charAt(7))
-                && (s.length() == 8 || isDigit(s.charAt(8))))) return new ValidationResponse("Wrong format ");
+                && (s.length() == 8 || isDigit(s.charAt(8))))) return new ValidationResponse("Неправильный формат РН");
         return new ValidationResponse();
     }
 
