@@ -4,21 +4,19 @@
  */
 package org.referenceCat;
 
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.fop.apps.*;
 import org.apache.log4j.Logger;
 import org.referenceCat.entities.Officer;
 import org.referenceCat.entities.Owner;
 import org.referenceCat.entities.Vehicle;
 import org.referenceCat.entities.Violation;
-import org.referenceCat.exceptions.ValidationException;
+import org.referenceCat.exceptions.PDApplicationCustomException;
 import org.referenceCat.ui.*;
 import org.referenceCat.utils.Utilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
@@ -31,10 +29,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -858,7 +854,7 @@ public class Application {
         return null;
     }
 
-    private void readXML(String path) throws ValidationException {
+    private void readXML(String path) throws PDApplicationCustomException {
         try {
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = dBuilder.parse(new File(path));
@@ -896,11 +892,11 @@ public class Application {
             commitTransaction(em);
             updateTable();
         } catch (Exception ex) {
-            throw new ValidationException("readXML exception");
+            throw new PDApplicationCustomException("readXML exception");
         }
     }
 
-    private void writeXML(String pathToResult) throws ValidationException {
+    private void writeXML(String pathToResult) throws PDApplicationCustomException {
         int[] ids;
         ids = tableViolations.getSelectedRows();
         if (ids.length == 0) {
@@ -914,11 +910,11 @@ public class Application {
         writeXMLbyId(pathToResult, ids, true);
     }
 
-    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed) throws ValidationException {
+    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed) throws PDApplicationCustomException {
         writeXMLbyId(pathToResult, ids,  cyrAllowed, "", "");
     }
 
-    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed, String from, String to) throws ValidationException {
+    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed, String from, String to) throws PDApplicationCustomException {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = builder.newDocument();
@@ -993,11 +989,11 @@ public class Application {
 
         } catch (Exception ex) {
             logger.error(ex);
-            throw new ValidationException("writeXML exception");
+            throw new PDApplicationCustomException("writeXML exception");
         }
     }
 
-    public void convertToPDF(String pathToSourceXML, String pathToResult) throws ValidationException, IOException {
+    public void convertToPDF(String pathToSourceXML, String pathToResult) throws PDApplicationCustomException, IOException {
         OutputStream out = null;
         try {
             // the XSL FO file
@@ -1032,7 +1028,7 @@ public class Application {
             transformer.transform(xmlSource, res);
         } catch (Exception ex) {
             logger.error(ex);
-            throw  new ValidationException("pdf exception");
+            throw  new PDApplicationCustomException("pdf exception");
         } finally {
             out.close();
         }
@@ -1122,7 +1118,7 @@ public class Application {
             }
         }
         if (ex.getClass() == ParseException.class) return "Неверный формат данных";
-        if (ex.getClass() == ValidationException.class) {
+        if (ex.getClass() == PDApplicationCustomException.class) {
             if (ex.getMessage().contains("readXML")) return "Некоректные данные xml файла или он не найден";
             if (ex.getMessage().contains("writeXML")) return "Не возмжна запись xml файла или он не найден";
             if (ex.getMessage().contains("pdf")) return "Ошибка при составлении отчета";
