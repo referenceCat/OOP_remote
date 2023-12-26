@@ -749,13 +749,14 @@ public class Application {
 
         ViolationDialog violationDialog = new ViolationDialog(frame);
 
+        violationDialog.typeInput.setSelectedItem((String) tableViolations.getValueAt(selectedRow, 1));
         violationDialog.penaltyInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 2));
         violationDialog.debtInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 3)).toString());
         violationDialog.commentaryInput.setText((String) tableViolations.getValueAt(selectedRow, 4));
         violationDialog.dateInput.setText((String) tableViolations.getValueAt(selectedRow, 5));
         violationDialog.vehicleIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 6)).toString());
-        violationDialog.typeInput.setSelectedItem(tableViolations.getValueAt(selectedRow, 1));
-        violationDialog.officerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 7)).toString());
+        if (tableViolations.getValueAt(selectedRow, 10) != null)
+            violationDialog.officerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 10)).toString());
         violationDialog.ownerIdInput.setText(((Integer) tableViolations.getValueAt(selectedRow, 8)).toString());
         violationDialog.applyButton.addActionListener(e -> {
             try {
