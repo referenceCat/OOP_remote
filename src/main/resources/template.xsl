@@ -15,19 +15,27 @@
                         <fo:table-column column-width="proportional-column-width(20)"/>
                         <fo:table-column column-width="proportional-column-width(20)"/>
                         <fo:table-column column-width="proportional-column-width(20)"/>
+                        <fo:table-column column-width="proportional-column-width(20)"/>
+                        <fo:table-column column-width="proportional-column-width(20)"/>
                         <fo:table-body font-size="95%">
                             <fo:table-row height="8mm">
                                 <fo:table-cell>
-                                    <fo:block>Date</fo:block>
+                                    <fo:block>Дата</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Penalty</fo:block>
+                                    <fo:block>Тип</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Commentary</fo:block>
+                                    <fo:block>Наказание</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Vehicle id</fo:block>
+                                    <fo:block>Комментарий</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>id ТС</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell>
+                                    <fo:block>id владельца</fo:block>
                                 </fo:table-cell>
                             </fo:table-row>
                             <xsl:for-each select="violation">
@@ -35,6 +43,11 @@
                                     <fo:table-cell>
                                         <fo:block>
                                             <xsl:value-of select="date"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <xsl:value-of select="type"/>
                                         </fo:block>
                                     </fo:table-cell>
                                     <fo:table-cell>
@@ -50,6 +63,11 @@
                                     <fo:table-cell>
                                         <fo:block>
                                             <xsl:value-of select="vehicle_id"/>
+                                        </fo:block>
+                                    </fo:table-cell>
+                                    <fo:table-cell>
+                                        <fo:block>
+                                            <xsl:value-of select="owner_id"/>
                                         </fo:block>
                                     </fo:table-cell>
                                 </fo:table-row>

@@ -997,6 +997,8 @@ public class Application {
             FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
             // Setup output
 
+
+
             out = new java.io.FileOutputStream(pathToResult);
 
 
@@ -1016,6 +1018,7 @@ public class Application {
             // PDF is created
             transformer.transform(xmlSource, res);
         } catch (Exception ex) {
+            logger.error(ex);
             throw  new ValidationException("pdf exception");
         } finally {
             out.close();
@@ -1118,8 +1121,8 @@ public class Application {
     private void defaultExceptionCatch(Throwable ex) {
         String description = throwableDescription(ex);
         if (description == null || description.isEmpty())
-            JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
-        JOptionPane.showMessageDialog(frame, "Something went wrong: " + ex.getClass().getName() + "\n" + description, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Ошибка: " + ex.getClass().getName(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Ошибка: " + ex.getClass().getName() + "\n" + description, "Error", JOptionPane.ERROR_MESSAGE);
         logger.error("Exception ", ex);
     }
 }
