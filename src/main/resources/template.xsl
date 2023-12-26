@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format" version="1.0">
     <xsl:template match="violations">
+        <!-- fonts -->
         <fo:root language="EN">
             <fo:layout-master-set>
                 <fo:simple-page-master master-name="content" page-height="297mm" page-width="210mm" margin-top="5mm" margin-bottom="5mm" margin-left="5mm" margin-right="5mm">
@@ -10,6 +11,15 @@
             </fo:layout-master-set>
             <fo:page-sequence master-reference="content">
                 <fo:flow flow-name="xsl-region-body" border-collapse="collapse" reference-orientation="0">
+                    <fo:block> Violations report </fo:block>
+                    <fo:block> From: </fo:block>
+                    <fo:block>
+                        <xsl:value-of select="from"/>
+                    </fo:block>
+                    <fo:block> To: </fo:block>
+                    <fo:block>
+                        <xsl:value-of select="to"/>
+                    </fo:block>
                     <fo:table table-layout="fixed" width="100%" font-size="10pt" border-color="black" border-width="0.35mm" border-style="solid" text-align="center" display-align="center" space-after="5mm">
                         <fo:table-column column-width="proportional-column-width(20)"/>
                         <fo:table-column column-width="proportional-column-width(20)"/>
@@ -20,22 +30,22 @@
                         <fo:table-body font-size="95%">
                             <fo:table-row height="8mm">
                                 <fo:table-cell>
-                                    <fo:block>Дата</fo:block>
+                                    <fo:block>DATE</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Тип</fo:block>
+                                    <fo:block>TYPE</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Наказание</fo:block>
+                                    <fo:block>PENALTY</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>Комментарий</fo:block>
+                                    <fo:block>COMMENTARY</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>id ТС</fo:block>
+                                    <fo:block>VEHILCE ID</fo:block>
                                 </fo:table-cell>
                                 <fo:table-cell>
-                                    <fo:block>id владельца</fo:block>
+                                    <fo:block>OWNER ID</fo:block>
                                 </fo:table-cell>
                             </fo:table-row>
                             <xsl:for-each select="violation">

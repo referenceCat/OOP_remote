@@ -49,6 +49,7 @@ public class Utilities {
     }
 
     public static boolean isDate(String s, String format_s) {
+        if (s == null || format_s == null) return false;
         try {
             SimpleDateFormat format = new SimpleDateFormat(format_s);
             format.setLenient(false);
@@ -103,5 +104,25 @@ public class Utilities {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static String convertCyrilic(String message){
+        boolean flag;
+        if (message == null) return null;
+        StringBuilder builder = new StringBuilder();
+        String abcCyr = "абвгдеёжзийклмнопрстуфхцчьыъшщэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЬЫЪШЩЭЮЯ";
+        String[] abcLat = {"a","b","v","g","d","e", "o", "zh","z","i","j","k","l","m","n","o","p","r","s","t","u","f","h", "c","ch","'","i","'","sh", "sch", "e", "u", "ya", "A","B","V","G","D","E", "O", "Zh","Z","I","Yo","K","L","M","N","O","P","R","S","T","U","F","Ch", "C","H","'","I","'","Sh", "Sch", "E", "Yu", "Ya"};
+        for (int i = 0; i < message.length(); i++) {
+            flag = true;
+            for (int x = 0; x < abcCyr.length(); x++ ) {
+                if (message.charAt(i) == abcCyr.charAt(x)) {
+                    builder.append(abcLat[x]);
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) builder.append(message.charAt(i));
+        }
+        return builder.toString();
     }
 }

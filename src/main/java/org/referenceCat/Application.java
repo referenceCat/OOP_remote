@@ -911,15 +911,27 @@ public class Application {
             ids[i] = (int) tableViolations.getValueAt(ids[i], 0);
         }
 
-        writeXMLbyId(pathToResult, ids);
+        writeXMLbyId(pathToResult, ids, true);
     }
 
-    private void writeXMLbyId(String pathToResult, int[] ids) throws ValidationException {
+    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed) throws ValidationException {
+        writeXMLbyId(pathToResult, ids,  cyrAllowed, "", "");
+    }
+
+    private void writeXMLbyId(String pathToResult, int[] ids, boolean cyrAllowed, String from, String to) throws ValidationException {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = builder.newDocument();
+
             Node violations = doc.createElement("violations");
             doc.appendChild(violations);
+
+            Element fromN = doc.createElement("from");
+            fromN.setTextContent(from);
+            violations.appendChild(fromN);
+            Element toN = doc.createElement("to");
+            toN.setTextContent(to);
+            violations.appendChild(toN);
 
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence_unit");
             EntityManager em = emf.createEntityManager();
@@ -934,11 +946,11 @@ public class Application {
                 violationItem.appendChild(subitem);
 
                 subitem = doc.createElement("type");
-                subitem.setTextContent(violation.getType());
+                subitem.setTextContent(cyrAllowed ? violation.getType() : Utilities.convertCyrilic(violation.getType()));
                 violationItem.appendChild(subitem);
 
                 subitem = doc.createElement("penalty");
-                subitem.setTextContent(violation.getPenalty());
+                subitem.setTextContent(cyrAllowed ? violation.getPenalty() : Utilities.convertCyrilic(violation.getPenalty()));
                 violationItem.appendChild(subitem);
 
                 if (violation.getPenalty().equals("Штраф")) {
@@ -950,7 +962,7 @@ public class Application {
                 if (violation.getCommentary() != null) {
                     // violationItem.setAttribute("commentary", violation.getCommentary());
                     subitem = doc.createElement("commentary");
-                    subitem.setTextContent(violation.getCommentary());
+                    subitem.setTextContent(cyrAllowed ? violation.getCommentary() : Utilities.convertCyrilic(violation.getCommentary()));
                     violationItem.appendChild(subitem);
                 }
 
@@ -980,6 +992,7 @@ public class Application {
             trans.transform(new DOMSource(doc), new StreamResult(fw));
 
         } catch (Exception ex) {
+            logger.error(ex);
             throw new ValidationException("writeXML exception");
         }
     }
@@ -1049,7 +1062,7 @@ public class Application {
                                     ids.add((Integer) tableViolations.getValueAt(i, 0));
                             }
                             int[] arr = ids.stream().mapToInt(i -> i).toArray();
-                            writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr);
+                            writeXMLbyId("/home/referencecat/IdeaProjects/TrafficPoliceApplication/xml_io/report_buffer.xml", arr, false, reportDialog.dateInput1.getText(), reportDialog.dateInput2.getText());
                             mutex.notifyAll();
                         } catch (Exception ex) {
                             defaultExceptionCatch(ex);
