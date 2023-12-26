@@ -469,39 +469,40 @@ public class Application {
         if (tabs.getSelectedIndex() == 0) {
 
             for (int i = 0; i < tableVehicles.getRowCount(); i++) {
-                if (!Integer.toString((Integer) tableVehicles.getValueAt(i, 0)).contains(searchTextField.getText()) &&
-                        !((String) tableVehicles.getValueAt(i, 1)).contains(searchTextField.getText()) &&
-                        !((String) tableVehicles.getValueAt(i, 2)).contains(searchTextField.getText()) &&
-                        !((String) tableVehicles.getValueAt(i, 3)).contains(searchTextField.getText()) &&
-                        !((String) tableVehicles.getValueAt(i, 4)).contains(searchTextField.getText()) &&
-                        !Integer.toString((Integer) tableVehicles.getValueAt(i, 5)).contains(searchTextField.getText()) &&
-                        !((String) tableVehicles.getValueAt(i, 6)).contains(searchTextField.getText())) {
+                if (    (tableVehicles.getValueAt(i, 0) == null || !Integer.toString((Integer) tableVehicles.getValueAt(i, 0)).contains(searchTextField.getText())) && (tableVehicles.getValueAt(i, 1) == null || !((String) tableVehicles.getValueAt(i, 1)).contains(searchTextField.getText())) &&
+                        (tableVehicles.getValueAt(i, 2) == null || !((String) tableVehicles.getValueAt(i, 2)).contains(searchTextField.getText())) &&
+                        (tableVehicles.getValueAt(i, 3) == null || !((String) tableVehicles.getValueAt(i, 3)).contains(searchTextField.getText())) &&
+                        (tableVehicles.getValueAt(i, 4) == null || !((String) tableVehicles.getValueAt(i, 4)).contains(searchTextField.getText())) &&
+                        (tableVehicles.getValueAt(i, 5) == null || !Integer.toString((Integer) tableVehicles.getValueAt(i, 5)).contains(searchTextField.getText())) &&
+                        (tableVehicles.getValueAt(i, 6) == null || !((String) tableVehicles.getValueAt(i, 6)).contains(searchTextField.getText()))) {
                     tableVehicles.setRowHeight(i, 1);
                 }
             }
         } else if (tabs.getSelectedIndex() == 1) {
             for (int i = 0; i < tableOwners.getRowCount(); i++) {
-                if (!Integer.toString((Integer) tableOwners.getValueAt(i, 0)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 1)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 2)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 4)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 5)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 6)).contains(searchTextField.getText()) &&
-                        !((String) tableOwners.getValueAt(i, 6)).contains(searchTextField.getText())) {
+                if (    (tableOwners.getValueAt(i, 0) == null || !Integer.toString((Integer) tableOwners.getValueAt(i, 0)).contains(searchTextField.getText())) &&
+                        (tableOwners.getValueAt(i, 1) == null || !((String) tableOwners.getValueAt(i, 1)).contains(searchTextField.getText())) &&
+                        (tableOwners.getValueAt(i, 2) == null || !((String) tableOwners.getValueAt(i, 2)).contains(searchTextField.getText())) &&
+                        (tableOwners.getValueAt(i, 3) == null || !((String) tableOwners.getValueAt(i, 3)).contains(searchTextField.getText())) &&
+                        (tableOwners.getValueAt(i, 4) == null || !((String) tableOwners.getValueAt(i, 4)).contains(searchTextField.getText()) )&&
+                        (tableOwners.getValueAt(i, 5) == null || !((String) tableOwners.getValueAt(i, 5)).contains(searchTextField.getText())) &&
+                        (tableOwners.getValueAt(i, 6) == null || !((String) tableOwners.getValueAt(i, 6)).contains(searchTextField.getText()))) {
                     tableOwners.setRowHeight(i, 1);
                 }
             }
         } else {
             for (int i = 0; i < tableViolations.getRowCount(); i++) { // todo (> _ <)
-                if (!Integer.toString((Integer) tableViolations.getValueAt(i, 0)).contains(searchTextField.getText()) &&
-                        !((String) tableViolations.getValueAt(i, 1)).contains(searchTextField.getText()) &&
-                        !Integer.toString((Integer) tableViolations.getValueAt(i, 2)).contains(searchTextField.getText()) &&
-                        !((String) tableViolations.getValueAt(i, 3)).contains(searchTextField.getText()) &&
-                        !((String) tableViolations.getValueAt(i, 4)).contains(searchTextField.getText()) &&
-                        !Integer.toString((Integer) tableViolations.getValueAt(i, 5)).contains(searchTextField.getText()) &&
-                        !((String) tableViolations.getValueAt(i, 6)).contains(searchTextField.getText()) &&
-                        !Integer.toString((Integer) tableViolations.getValueAt(i, 7)).contains(searchTextField.getText()) &&
-                        !((String) tableViolations.getValueAt(i, 8)).contains(searchTextField.getText())) {
+                if (    (tableViolations.getValueAt(i, 0) == null || !Integer.toString((Integer) tableViolations.getValueAt(i, 0)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 1) == null || !((String) tableViolations.getValueAt(i, 1)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 2) == null || !((String) tableViolations.getValueAt(i, 2)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 3) == null || !Integer.toString((Integer) tableViolations.getValueAt(i, 3)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 4) == null || !((String) tableViolations.getValueAt(i, 4)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 5) == null || !((String) tableViolations.getValueAt(i, 5)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 6) == null || !Integer.toString((Integer) tableViolations.getValueAt(i, 6)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 7) == null || !((String) tableViolations.getValueAt(i, 7)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 8) == null || !Integer.toString((Integer) tableViolations.getValueAt(i, 8)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 9) == null || !((String) tableViolations.getValueAt(i, 9)).contains(searchTextField.getText())) &&
+                        (tableViolations.getValueAt(i, 10) == null || !Integer.toString((Integer) tableViolations.getValueAt(i, 10)).contains(searchTextField.getText()))) {
                     tableViolations.setRowHeight(i, 1);
                 }
             }
@@ -537,12 +538,13 @@ public class Application {
             Vehicle vehicle = violation.getVehicle();
             Owner owner = violation.getOwner();
             Officer officer = violation.getOfficer();
-            model.addRow(new Object[]{violation.getId(), violation.getType(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate(), Utilities.DATE_TIME_FORMAT), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + (owner.getPatronymic() != null ? owner.getPatronymic() : ""), officer == null ? "" : officer.getId()});
+            model.addRow(new Object[]{violation.getId(), violation.getType(), violation.getPenalty(), violation.getDebt(), violation.getCommentary(), Utilities.dateToString(violation.getDate(), Utilities.DATE_TIME_FORMAT), vehicle.getId(), vehicle.getRegNumber(), owner.getId(), owner.getSurname() + " " + owner.getName() + " " + (owner.getPatronymic() != null ? owner.getPatronymic() : ""), officer == null ? null : officer.getId()});
         }
 
         tableVehicles.setRowHeight(16);
         tableOwners.setRowHeight(16);
         tableViolations.setRowHeight(16);
+        onTableSelection();
         logger.info("Table updated");
     }
 
