@@ -128,8 +128,8 @@ public class Application {
         toolBar.add(deleteButton);
         toolBar.add(editButton);
         toolBar.add(reloadButton);
-        toolBar.add(readXMLButton);
-        toolBar.add(writeXMLButton);
+//        toolBar.add(readXMLButton);
+//        toolBar.add(writeXMLButton);
         toolBar.add(pdfButton);
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(searchTextField);
